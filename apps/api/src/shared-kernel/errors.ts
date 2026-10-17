@@ -39,8 +39,13 @@ export class AuthError extends AppError {
 
 /** 403 — authenticated but not authorised for this resource. */
 export class ForbiddenError extends AppError {
-  readonly code = 'FORBIDDEN';
+  readonly code: string;
   readonly httpStatus = 403;
+
+  constructor(message: string, details?: unknown, code = 'FORBIDDEN') {
+    super(message, details);
+    this.code = code;
+  }
 }
 
 /** 404 — resource does not exist. */

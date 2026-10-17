@@ -30,6 +30,9 @@ async function bootstrap() {
   const realtimeGateway = new RealtimeGateway(io, container.eventBus, container.tokenService);
   const scheduler = new Scheduler(container.occupancyService, container.sessionsService, container.clock);
 
+  // Boot-time cleanup of lingering sim-* sessions from past simulation runs
+  await container.simulatorService.bootCleanup();
+
   scheduler.start();
 
   const server = httpServer.listen(config.PORT, () => {
@@ -41,6 +44,7 @@ async function bootstrap() {
   function shutdown(signal: string): void {
     logger.info({ signal }, 'Shutting down...');
     scheduler.stop();
+    void container.simulatorService.stop().catch(() => {});
     realtimeGateway.destroy();
     io.close();
 

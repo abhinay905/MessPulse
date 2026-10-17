@@ -171,3 +171,26 @@ export const SocketEvents = {
   CameraHealth: 'camera:health',
 } as const;
 export type SocketEventName = (typeof SocketEvents)[keyof typeof SocketEvents];
+
+// ─── Simulator Contracts (DOC3 §3.9) ──────────────────────────────────────────
+
+export const SimulatorStartSchema = z.object({
+  speed: z.number().min(1).max(30).default(6),
+  peakPeople: z.number().int().positive().default(220),
+  durationMin: z.number().int().positive().default(18),
+  appAdoption: z.number().min(0).max(1).default(0.7),
+  seed: z.number().int().default(42),
+  messId: z.string().optional(),
+  mealId: z.string().optional(),
+});
+export type SimulatorStartInput = z.infer<typeof SimulatorStartSchema>;
+
+export const SimulatorStatusSchema = z.object({
+  running: z.boolean(),
+  runId: z.string().nullable(),
+  speed: z.number().nullable(),
+  simulatedElapsedMin: z.number().nullable(),
+  eventsRemaining: z.number().nullable(),
+  error: z.string().nullable(),
+});
+export type SimulatorStatus = z.infer<typeof SimulatorStatusSchema>;

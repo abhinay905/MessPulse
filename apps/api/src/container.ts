@@ -42,6 +42,7 @@ import { IngestService } from './modules/ingest/ingest.service';
 import { OccupancyService } from './modules/occupancy/occupancy.service';
 import { SessionService } from './modules/sessions/sessions.service';
 import { MongoCheckInRepository } from './infra/mongo/check-in.repository';
+import { SimulatorService } from './modules/simulator/simulator.service';
 
 export interface Container {
   clock: SwitchableClock;
@@ -62,6 +63,7 @@ export interface Container {
   ingestService: IngestService;
   occupancyService: OccupancyService;
   sessionsService: SessionService;
+  simulatorService: SimulatorService;
   redis?: Redis | undefined;
 }
 
@@ -83,6 +85,8 @@ export interface ContainerOverrides {
   ingestService?: IngestService | undefined;
   occupancyService?: OccupancyService | undefined;
   sessionsService?: SessionService | undefined;
+  simulatorService?: SimulatorService | undefined;
+  allowSimulator?: boolean | undefined;
   redis?: Redis | undefined;
 }
 
@@ -196,6 +200,22 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
       config.DEFAULT_MESS_ID
     );
 
+  const simulatorService =
+    overrides.simulatorService ??
+    new SimulatorService({
+      clock,
+      ingestService,
+      sessionService: sessionsService,
+      sessionStore,
+      mealRepo,
+      allowSimulator:
+        overrides.allowSimulator ??
+        (process.env.ALLOW_SIMULATOR !== undefined
+          ? process.env.ALLOW_SIMULATOR === 'true'
+          : config.ALLOW_SIMULATOR),
+      defaultMessId: config.DEFAULT_MESS_ID,
+    });
+
   return {
     clock,
     eventBus,
@@ -215,6 +235,7 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
     ingestService,
     occupancyService,
     sessionsService,
+    simulatorService,
     redis,
   };
 }
