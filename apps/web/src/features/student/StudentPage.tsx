@@ -16,6 +16,7 @@ import { OccupancyGauge } from './components/OccupancyGauge';
 import { WaitTimeCard } from './components/WaitTimeCard';
 import { BestWindows } from './components/BestWindows';
 import { CheckInCard } from './components/CheckInCard';
+import { OptOutToggle } from '../optouts';
 import { Card } from '../../components/ui/Card';
 import { formatSecondsAgo } from '../../lib/format';
 
@@ -127,6 +128,9 @@ export const StudentPage: React.FC = () => {
 
             {/* Check-In Card / Active Session */}
             <CheckInCard />
+
+            {/* Advance Opt-Out Toggle ("Skipping Today") (DOC4 Step 17) */}
+            <OptOutToggle mealId={snapshot.mealId} />
 
             {/* Queue Wait Time Card */}
             <WaitTimeCard snapshot={snapshot} />

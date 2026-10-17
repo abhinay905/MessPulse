@@ -69,6 +69,7 @@ import { TrayDepletionRule } from './modules/alerts/rules/tray-depletion.rule';
 import { AlertService } from './modules/alerts/alerts.service';
 import { SimulatorService } from './modules/simulator/simulator.service';
 import { AdminService } from './modules/admin/admin.service';
+import { OptOutService } from './modules/optouts/optouts.service';
 
 import { MongoOptOutRepository } from './infra/mongo/opt-out.repository';
 import { MongoRatingRepository } from './infra/mongo/rating.repository';
@@ -121,6 +122,7 @@ export interface Container {
   occupancyService: OccupancyService;
   sessionsService: SessionService;
   simulatorService: SimulatorService;
+  optOutService: OptOutService;
   redis?: Redis | undefined;
 
   // Phase 2 Repositories
@@ -171,6 +173,7 @@ export interface ContainerOverrides {
   occupancyService?: OccupancyService | undefined;
   sessionsService?: SessionService | undefined;
   simulatorService?: SimulatorService | undefined;
+  optOutService?: OptOutService | undefined;
   allowSimulator?: boolean | undefined;
   redis?: Redis | undefined;
 
@@ -421,6 +424,17 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
   const objectStorage = overrides.objectStorage ?? new LocalDiskStorage();
   const pushNotifier = overrides.pushNotifier ?? new NoopNotifier();
 
+  const optOutService =
+    overrides.optOutService ??
+    new OptOutService(
+      optOutRepo,
+      mealRepo,
+      settingsRepo,
+      eventBus,
+      clock,
+      config.DEFAULT_MESS_ID
+    );
+
   return {
     clock,
     eventBus,
@@ -445,6 +459,7 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
     occupancyService,
     sessionsService,
     simulatorService,
+    optOutService,
     redis,
 
     // Phase 2 Repositories

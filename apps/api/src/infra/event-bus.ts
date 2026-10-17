@@ -16,6 +16,16 @@ export interface EventPayloadMap {
   'alert.raised': AlertDTO;
   'alert.cleared': { id: string; mealId: string; ruleId: string; clearedAt: number };
   'settings.changed': { messId: string; updatedAt: number };
+  // Phase 2 events (DOC3 §3.12)
+  'optout.changed': { messId: string; mealId: string; userId: string; optedOut: boolean; at: number };
+  'rating.due': { userId: string; sessionId: string; mealId?: string };
+  'rating.submitted': { sessionId: string; userId: string; mealId: string; stars: number; dishVotes?: Array<{ dish: string; vote: 'up' | 'down' }> };
+  'complaint.filed': { sessionId: string; userId: string; mealId: string; category: string };
+  'hygiene.reported': { reportId: string; mealId: string; userId: string };
+  'hold.raised': { holdId: string; mealId: string; reportId: string };
+  'hold.released': { holdId: string; mealId: string; releasedBy: string };
+  'fastpass.used': { code: string; userId: string; mealId: string };
+  'audit.flagged': { eventId: string; mealId: string; kind: string };
 }
 
 export type EventName = keyof EventPayloadMap;

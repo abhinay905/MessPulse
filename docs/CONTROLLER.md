@@ -3,8 +3,8 @@
 ## Session State
 ```
 PHASE:           2                      (1 = Steps 1–15 MVP · 2 = Steps 16–28 SHOULD/COULD. Only Nilesh changes this.)
-CURRENT_STEP:    Build Step 17 — Advance Opt-Out (P1)
-LAST_COMPLETED:  Build Step 16 — Phase 2 Foundation (contracts, ports, repositories, settings, seed)
+CURRENT_STEP:    Build Step 18 — Post-Meal Rating + Dish Votes (P2)
+LAST_COMPLETED:  Build Step 17 — Advance Opt-Out (P1)
 SESSION_STATUS:  ACTIVE
 PAUSED_AT:       none
 ```

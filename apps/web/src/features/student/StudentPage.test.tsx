@@ -18,6 +18,9 @@ vi.mock('./hooks/useActiveSession', () => ({
     refetch: vi.fn(),
   }),
 }));
+vi.mock('../optouts', () => ({
+  OptOutToggle: () => <div data-testid="opt-out-toggle">OptOutToggle</div>,
+}));
 
 const mockSnapshot: StatusSnapshot = {
   messId: 'mess-main-hall',

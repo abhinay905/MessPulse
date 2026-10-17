@@ -20,6 +20,7 @@ import { createSessionsRoutes } from './modules/sessions/sessions.routes';
 import { createSimulatorRoutes } from './modules/simulator/simulator.routes';
 import { createAlertsRoutes } from './modules/alerts/alerts.routes';
 import { createAdminRoutes } from './modules/admin/admin.routes';
+import { createOptOutRoutes } from './modules/optouts/optouts.routes';
 
 export function buildApp(
   container: Container = buildContainer(),
@@ -101,6 +102,10 @@ export function buildApp(
   const adminRoutes = createAdminRoutes(container.adminService, container.authMiddleware);
   app.use('/api/v1/admin', adminRoutes);
   app.use('/admin', adminRoutes);
+
+  const optOutRoutes = createOptOutRoutes(container.optOutService, container.authMiddleware);
+  app.use('/api/v1/optouts', optOutRoutes);
+  app.use('/optouts', optOutRoutes);
 
   if (configureExtraRoutes) {
     configureExtraRoutes(app);

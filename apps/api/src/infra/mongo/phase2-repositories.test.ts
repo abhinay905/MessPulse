@@ -235,7 +235,7 @@ describe('Phase 2 MongoDB Repositories Integration Suite', () => {
 
       const released = await repo.release(hold.id as string, 'staff-1', Date.now());
       expect(released?.status).toBe('released');
-      expect(released?.resolvedBy ?? released?.releasedBy).toBe('staff-1');
+      expect(released?.releasedBy).toBe('staff-1');
 
       const activeAfter = await repo.findActiveByReportId('rep-1');
       expect(activeAfter).toBeNull();
