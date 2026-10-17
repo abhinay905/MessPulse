@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build and test outputs
+dist/
+build/
+coverage/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Editor / IDE folders
+.idea/
+.vscode/
+
+# Local vision clips and video files
+services/vision/clips/
+*.mp4
+*.mov
+*.avi
+
+# OS junk
+.DS_Store
+Thumbs.db
