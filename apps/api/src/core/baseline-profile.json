@@ -1,0 +1,25 @@
+{
+  "name": "default-lunch-wave",
+  "mealType": "lunch",
+  "buckets": [
+    { "minuteOffset": 0, "relativeOccupancy": 0.15 },
+    { "minuteOffset": 5, "relativeOccupancy": 0.25 },
+    { "minuteOffset": 10, "relativeOccupancy": 0.40 },
+    { "minuteOffset": 15, "relativeOccupancy": 0.55 },
+    { "minuteOffset": 20, "relativeOccupancy": 0.70 },
+    { "minuteOffset": 25, "relativeOccupancy": 0.85 },
+    { "minuteOffset": 30, "relativeOccupancy": 0.95 },
+    { "minuteOffset": 35, "relativeOccupancy": 0.98 },
+    { "minuteOffset": 40, "relativeOccupancy": 0.92 },
+    { "minuteOffset": 45, "relativeOccupancy": 0.85 },
+    { "minuteOffset": 50, "relativeOccupancy": 0.75 },
+    { "minuteOffset": 55, "relativeOccupancy": 0.65 },
+    { "minuteOffset": 60, "relativeOccupancy": 0.50 },
+    { "minuteOffset": 65, "relativeOccupancy": 0.40 },
+    { "minuteOffset": 70, "relativeOccupancy": 0.30 },
+    { "minuteOffset": 75, "relativeOccupancy": 0.25 },
+    { "minuteOffset": 80, "relativeOccupancy": 0.20 },
+    { "minuteOffset": 85, "relativeOccupancy": 0.15 },
+    { "minuteOffset": 90, "relativeOccupancy": 0.10 }
+  ]
+}

@@ -3,8 +3,8 @@
 ## Session State
 ```
 PHASE:           1                      (1 = Steps 1–15 MVP · 2 = Steps 16–28 SHOULD/COULD. Only Nilesh changes this.)
-CURRENT_STEP:    Build Step 3 — Pure Domain Core
-LAST_COMPLETED:  Build Step 2 — Monorepo Scaffold, Shared Contracts, Base Infra
+CURRENT_STEP:    Build Step 4 — Store Ports and Redis / In-Memory Implementations
+LAST_COMPLETED:  Build Step 3 — Pure Domain Core
 SESSION_STATUS:  ACTIVE                 (ACTIVE | RESUMING | BLOCKED | CHECKPOINT)
 PAUSED_AT:
 ```
