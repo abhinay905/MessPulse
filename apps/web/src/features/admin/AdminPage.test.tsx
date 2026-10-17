@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AdminPage } from './AdminPage';
-import type { StatusSnapshot } from '@messpulse/shared';
+import { SettingsDTOSchema, type StatusSnapshot } from '@messpulse/shared';
 import * as useAuthModule from '../auth/useAuth';
 import * as useLiveStatusModule from '../student/hooks/useLiveStatus';
 import * as useSettingsModule from './hooks/useSettings';
@@ -76,7 +76,7 @@ describe('AdminPage', () => {
     });
 
     vi.spyOn(useSettingsModule, 'useSettings').mockReturnValue({
-      settings: {
+      settings: SettingsDTOSchema.parse({
         messId: 'mess-main-hall',
         capacity: 200,
         servicePerMin: 12,
@@ -86,7 +86,7 @@ describe('AdminPage', () => {
         staleCameraSec: 30,
         alertCooldownSec: 180,
         updatedAt: 1700000000000,
-      },
+      }),
       isLoading: false,
       isSaving: false,
       error: null,

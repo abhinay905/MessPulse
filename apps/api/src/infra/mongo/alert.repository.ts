@@ -12,6 +12,7 @@ function toEntity(doc: IAlertDocument): AlertEntity {
     messId: doc.messId,
     mealId: doc.mealId,
     ruleId: doc.ruleId,
+    subjectKey: doc.subjectKey,
     severity: doc.severity,
     payload: (doc.payload as Record<string, unknown>) || {},
     raisedAt: doc.raisedAt,

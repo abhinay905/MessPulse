@@ -35,6 +35,26 @@ import type {
   SnapshotRepository,
   CheckInRepository,
   AlertRepository,
+  OptOutRepository,
+  RatingRepository,
+  ComplaintRepository,
+  HygieneReportRepository,
+  TrayHoldRepository,
+  WasteLedgerRepository,
+  MealSummaryRepository,
+  TimetableBreakRepository,
+  DishStatRepository,
+  RebateLedgerRepository,
+  FastPassRepository,
+  PushSubscriptionRepository,
+  DeviceSightingRepository,
+  AuditEventRepository,
+  RatingDueStore,
+  AuditCounterStore,
+  ZoneReadingStore,
+  ManualQueueStore,
+  ObjectStorage,
+  PushNotifier,
 } from './core/ports';
 import { TokenService } from './modules/auth/token.service';
 import { AuthService } from './modules/auth/auth.service';
@@ -49,6 +69,33 @@ import { TrayDepletionRule } from './modules/alerts/rules/tray-depletion.rule';
 import { AlertService } from './modules/alerts/alerts.service';
 import { SimulatorService } from './modules/simulator/simulator.service';
 import { AdminService } from './modules/admin/admin.service';
+
+import { MongoOptOutRepository } from './infra/mongo/opt-out.repository';
+import { MongoRatingRepository } from './infra/mongo/rating.repository';
+import { MongoComplaintRepository } from './infra/mongo/complaint.repository';
+import { MongoHygieneReportRepository } from './infra/mongo/hygiene-report.repository';
+import { MongoTrayHoldRepository } from './infra/mongo/tray-hold.repository';
+import { MongoWasteLedgerRepository } from './infra/mongo/waste-ledger.repository';
+import { MongoMealSummaryRepository } from './infra/mongo/meal-summary.repository';
+import { MongoTimetableBreakRepository } from './infra/mongo/timetable-break.repository';
+import { MongoDishStatRepository } from './infra/mongo/dish-stat.repository';
+import { MongoRebateLedgerRepository } from './infra/mongo/rebate-ledger.repository';
+import { MongoFastPassRepository } from './infra/mongo/fast-pass.repository';
+import { MongoPushSubscriptionRepository } from './infra/mongo/push-subscription.repository';
+import { MongoDeviceSightingRepository } from './infra/mongo/device-sighting.repository';
+import { MongoAuditEventRepository } from './infra/mongo/audit-event.repository';
+
+import { RedisRatingDueStore } from './infra/redis/rating-due-store.redis';
+import { InMemoryRatingDueStore } from './infra/memory/rating-due-store.memory';
+import { RedisAuditCounterStore } from './infra/redis/audit-counter-store.redis';
+import { InMemoryAuditCounterStore } from './infra/memory/audit-counter-store.memory';
+import { RedisZoneReadingStore } from './infra/redis/zone-reading-store.redis';
+import { InMemoryZoneReadingStore } from './infra/memory/zone-reading-store.memory';
+import { RedisManualQueueStore } from './infra/redis/manual-queue-store.redis';
+import { InMemoryManualQueueStore } from './infra/memory/manual-queue-store.memory';
+
+import { LocalDiskStorage } from './infra/storage/local-disk.storage';
+import { NoopNotifier } from './infra/push/noop.notifier';
 
 export interface Container {
   clock: SwitchableClock;
@@ -75,6 +122,30 @@ export interface Container {
   sessionsService: SessionService;
   simulatorService: SimulatorService;
   redis?: Redis | undefined;
+
+  // Phase 2 Repositories
+  optOutRepo: OptOutRepository;
+  ratingRepo: RatingRepository;
+  complaintRepo: ComplaintRepository;
+  hygieneRepo: HygieneReportRepository;
+  trayHoldRepo: TrayHoldRepository;
+  wasteLedgerRepo: WasteLedgerRepository;
+  mealSummaryRepo: MealSummaryRepository;
+  timetableBreakRepo: TimetableBreakRepository;
+  dishStatRepo: DishStatRepository;
+  rebateLedgerRepo: RebateLedgerRepository;
+  fastPassRepo: FastPassRepository;
+  pushSubscriptionRepo: PushSubscriptionRepository;
+  deviceSightingRepo: DeviceSightingRepository;
+  auditEventRepo: AuditEventRepository;
+
+  // Phase 2 Stores & Adapters
+  ratingDueStore: RatingDueStore;
+  auditCounterStore: AuditCounterStore;
+  zoneReadingStore: ZoneReadingStore;
+  manualQueueStore: ManualQueueStore;
+  objectStorage: ObjectStorage;
+  pushNotifier: PushNotifier;
 }
 
 export interface ContainerOverrides {
@@ -102,6 +173,30 @@ export interface ContainerOverrides {
   simulatorService?: SimulatorService | undefined;
   allowSimulator?: boolean | undefined;
   redis?: Redis | undefined;
+
+  // Phase 2 Repositories
+  optOutRepo?: OptOutRepository | undefined;
+  ratingRepo?: RatingRepository | undefined;
+  complaintRepo?: ComplaintRepository | undefined;
+  hygieneRepo?: HygieneReportRepository | undefined;
+  trayHoldRepo?: TrayHoldRepository | undefined;
+  wasteLedgerRepo?: WasteLedgerRepository | undefined;
+  mealSummaryRepo?: MealSummaryRepository | undefined;
+  timetableBreakRepo?: TimetableBreakRepository | undefined;
+  dishStatRepo?: DishStatRepository | undefined;
+  rebateLedgerRepo?: RebateLedgerRepository | undefined;
+  fastPassRepo?: FastPassRepository | undefined;
+  pushSubscriptionRepo?: PushSubscriptionRepository | undefined;
+  deviceSightingRepo?: DeviceSightingRepository | undefined;
+  auditEventRepo?: AuditEventRepository | undefined;
+
+  // Phase 2 Stores & Adapters
+  ratingDueStore?: RatingDueStore | undefined;
+  auditCounterStore?: AuditCounterStore | undefined;
+  zoneReadingStore?: ZoneReadingStore | undefined;
+  manualQueueStore?: ManualQueueStore | undefined;
+  objectStorage?: ObjectStorage | undefined;
+  pushNotifier?: PushNotifier | undefined;
 }
 
 export function buildContainer(overrides: ContainerOverrides = {}): Container {
@@ -266,6 +361,66 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
       config.JWT_SECRET
     );
 
+  // Phase 2 Repositories
+  const optOutRepo = overrides.optOutRepo ?? new MongoOptOutRepository();
+  const ratingRepo = overrides.ratingRepo ?? new MongoRatingRepository();
+  const complaintRepo = overrides.complaintRepo ?? new MongoComplaintRepository();
+  const hygieneRepo = overrides.hygieneRepo ?? new MongoHygieneReportRepository();
+  const trayHoldRepo = overrides.trayHoldRepo ?? new MongoTrayHoldRepository();
+  const wasteLedgerRepo = overrides.wasteLedgerRepo ?? new MongoWasteLedgerRepository();
+  const mealSummaryRepo = overrides.mealSummaryRepo ?? new MongoMealSummaryRepository();
+  const timetableBreakRepo = overrides.timetableBreakRepo ?? new MongoTimetableBreakRepository();
+  const dishStatRepo = overrides.dishStatRepo ?? new MongoDishStatRepository();
+  const rebateLedgerRepo = overrides.rebateLedgerRepo ?? new MongoRebateLedgerRepository();
+  const fastPassRepo = overrides.fastPassRepo ?? new MongoFastPassRepository();
+  const pushSubscriptionRepo = overrides.pushSubscriptionRepo ?? new MongoPushSubscriptionRepository();
+  const deviceSightingRepo = overrides.deviceSightingRepo ?? new MongoDeviceSightingRepository();
+  const auditEventRepo = overrides.auditEventRepo ?? new MongoAuditEventRepository();
+
+  // Phase 2 Stores & Adapters
+  let ratingDueStore: RatingDueStore;
+  if (overrides.ratingDueStore) {
+    ratingDueStore = overrides.ratingDueStore;
+  } else if (process.env.NODE_ENV === 'test' && !process.env.USE_REDIS_IN_TESTS) {
+    ratingDueStore = new InMemoryRatingDueStore();
+  } else {
+    redis = redis ?? new Redis(config.REDIS_URL, { maxRetriesPerRequest: null, lazyConnect: true });
+    ratingDueStore = new RedisRatingDueStore(redis);
+  }
+
+  let auditCounterStore: AuditCounterStore;
+  if (overrides.auditCounterStore) {
+    auditCounterStore = overrides.auditCounterStore;
+  } else if (process.env.NODE_ENV === 'test' && !process.env.USE_REDIS_IN_TESTS) {
+    auditCounterStore = new InMemoryAuditCounterStore();
+  } else {
+    redis = redis ?? new Redis(config.REDIS_URL, { maxRetriesPerRequest: null, lazyConnect: true });
+    auditCounterStore = new RedisAuditCounterStore(redis);
+  }
+
+  let zoneReadingStore: ZoneReadingStore;
+  if (overrides.zoneReadingStore) {
+    zoneReadingStore = overrides.zoneReadingStore;
+  } else if (process.env.NODE_ENV === 'test' && !process.env.USE_REDIS_IN_TESTS) {
+    zoneReadingStore = new InMemoryZoneReadingStore();
+  } else {
+    redis = redis ?? new Redis(config.REDIS_URL, { maxRetriesPerRequest: null, lazyConnect: true });
+    zoneReadingStore = new RedisZoneReadingStore(redis);
+  }
+
+  let manualQueueStore: ManualQueueStore;
+  if (overrides.manualQueueStore) {
+    manualQueueStore = overrides.manualQueueStore;
+  } else if (process.env.NODE_ENV === 'test' && !process.env.USE_REDIS_IN_TESTS) {
+    manualQueueStore = new InMemoryManualQueueStore();
+  } else {
+    redis = redis ?? new Redis(config.REDIS_URL, { maxRetriesPerRequest: null, lazyConnect: true });
+    manualQueueStore = new RedisManualQueueStore(redis);
+  }
+
+  const objectStorage = overrides.objectStorage ?? new LocalDiskStorage();
+  const pushNotifier = overrides.pushNotifier ?? new NoopNotifier();
+
   return {
     clock,
     eventBus,
@@ -291,5 +446,29 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
     sessionsService,
     simulatorService,
     redis,
+
+    // Phase 2 Repositories
+    optOutRepo,
+    ratingRepo,
+    complaintRepo,
+    hygieneRepo,
+    trayHoldRepo,
+    wasteLedgerRepo,
+    mealSummaryRepo,
+    timetableBreakRepo,
+    dishStatRepo,
+    rebateLedgerRepo,
+    fastPassRepo,
+    pushSubscriptionRepo,
+    deviceSightingRepo,
+    auditEventRepo,
+
+    // Phase 2 Stores & Adapters
+    ratingDueStore,
+    auditCounterStore,
+    zoneReadingStore,
+    manualQueueStore,
+    objectStorage,
+    pushNotifier,
   };
 }

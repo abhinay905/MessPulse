@@ -14,6 +14,8 @@ export interface IMealDocument extends Document {
   menuItems: string[];
   menuDemandFactorMin: number;
   trayCapacity?: number | undefined;
+  autoCalibrated?: boolean | undefined;
+  counters?: string[] | undefined;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -58,6 +60,16 @@ const mealSchema = new Schema<IMealDocument>(
     trayCapacity: {
       type: Number,
       required: false,
+    },
+    autoCalibrated: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    counters: {
+      type: [String],
+      required: false,
+      default: undefined,
     },
   },
   {

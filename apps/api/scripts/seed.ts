@@ -17,13 +17,14 @@ import { MealModel } from '../src/infra/mongo/models/meal.model';
 import { MessSettingsModel } from '../src/infra/mongo/models/mess-settings.model';
 import { UserModel } from '../src/infra/mongo/models/user.model';
 import { OccupancySnapshotModel } from '../src/infra/mongo/models/occupancy-snapshot.model';
+import { TimetableBreakModel } from '../src/infra/mongo/models/timetable-break.model';
 
 export async function seed(): Promise<void> {
   await connectMongo();
 
   const messIds = Array.from(new Set([process.env.DEFAULT_MESS_ID || 'mess-main-hall', 'hostel-mess-1']));
 
-  // 1. Seed Default MessSettings for all messIds
+  // 1. Seed Default MessSettings for all messIds (including Phase 2 settings)
   for (const messId of messIds) {
     await MessSettingsModel.findOneAndUpdate(
       { messId },
@@ -52,6 +53,51 @@ export async function seed(): Promise<void> {
             clearRatio: 0.7,
             horizonMin: 10,
           },
+          // Phase 2 Settings (DOC2 §2.7.3)
+          enrolledCount: 500,
+          defaultEatRate: 0.7,
+          portionsPerPerson: 1,
+          safetyMarginPct: 8,
+          counters: [
+            { id: 'regular', label: 'Regular Counter', servicePerMin: 12 },
+            { id: 'special', label: 'Special Counter', servicePerMin: 8 },
+          ],
+          optOutCutoffMin: 60,
+          ratingDelayMin: 22,
+          walkToMessMin: 5,
+          batchQuality: {
+            threshold: 5,
+            windowMin: 10,
+            cooldownMin: 10,
+          },
+          unaccounted: {
+            windowMin: 10,
+            minAbsolute: 8,
+            tolerancePct: 25,
+            minCameraEntries: 15,
+            cooldownMin: 10,
+          },
+          randomAudit: {
+            enabled: false,
+            everyN: 25,
+          },
+          deviceAnomaly: {
+            maxUsersPerDevice: 2,
+            maxDevicesPerUser: 3,
+            windowMin: 30,
+          },
+          rebate: {
+            pointsPerOptOut: 5,
+            fastPassCost: 20,
+            maxFastPassesPerMeal: 10,
+            blockAfterViolations: 2,
+          },
+          autoCalibrateDemand: false,
+          dpsWeights: {
+            rating: 0.7,
+            skip: 0.3,
+          },
+          imageRetentionDays: 30,
         },
       },
       { upsert: true, new: true }
@@ -117,6 +163,8 @@ export async function seed(): Promise<void> {
           menuItems: ['Dal Tadka', 'Jeera Rice', 'Paneer Butter Masala', 'Roti', 'Salad'],
           menuDemandFactorMin: 2,
           trayCapacity: 400,
+          autoCalibrated: false,
+          counters: ['regular', 'special'],
         },
       },
       { upsert: true, new: true }
@@ -134,10 +182,28 @@ export async function seed(): Promise<void> {
           menuItems: ['Mix Veg', 'Steamed Rice', 'Dal Fry', 'Roti', 'Gulab Jamun'],
           menuDemandFactorMin: 1,
           trayCapacity: 400,
+          autoCalibrated: false,
+          counters: ['regular', 'special'],
         },
       },
       { upsert: true, new: true }
     );
+
+    // 4. Seed sample Timetable breaks (DOC4 Step 16, DOC2 §2.7.2)
+    await TimetableBreakModel.deleteMany({ messId });
+    const sampleBreaks = [
+      { messId, dayOfWeek: 1, startsAt: '12:45', endsAt: '13:00', label: 'CS & Mech Break' },
+      { messId, dayOfWeek: 1, startsAt: '13:15', endsAt: '13:30', label: 'EE & Civil Break' },
+      { messId, dayOfWeek: 2, startsAt: '12:45', endsAt: '13:00', label: 'CS & Mech Break' },
+      { messId, dayOfWeek: 2, startsAt: '13:15', endsAt: '13:30', label: 'EE & Civil Break' },
+      { messId, dayOfWeek: 3, startsAt: '12:45', endsAt: '13:00', label: 'CS & Mech Break' },
+      { messId, dayOfWeek: 3, startsAt: '13:15', endsAt: '13:30', label: 'EE & Civil Break' },
+      { messId, dayOfWeek: 4, startsAt: '12:45', endsAt: '13:00', label: 'CS & Mech Break' },
+      { messId, dayOfWeek: 4, startsAt: '13:15', endsAt: '13:30', label: 'EE & Civil Break' },
+      { messId, dayOfWeek: 5, startsAt: '12:45', endsAt: '13:00', label: 'CS & Mech Break' },
+      { messId, dayOfWeek: 5, startsAt: '13:15', endsAt: '13:30', label: 'EE & Civil Break' },
+    ];
+    await TimetableBreakModel.insertMany(sampleBreaks);
   }
 
   // 4. Seed 3 days of historical snapshots so best-windows and admin charts have real historical data (DOC4 Step 15)

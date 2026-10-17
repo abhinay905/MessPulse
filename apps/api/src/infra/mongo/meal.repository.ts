@@ -17,6 +17,8 @@ function toEntity(doc: IMealDocument): MealEntity {
     menuItems: [...doc.menuItems],
     menuDemandFactorMin: doc.menuDemandFactorMin,
     trayCapacity: doc.trayCapacity,
+    autoCalibrated: doc.autoCalibrated,
+    counters: doc.counters ? [...doc.counters] : undefined,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };

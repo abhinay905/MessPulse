@@ -5,6 +5,7 @@
 
 import {
   SettingsPatchSchema,
+  SettingsDTOSchema,
   type SettingsDTO,
   type SettingsPatch,
   type TimeSeriesPoint,
@@ -209,7 +210,7 @@ export class AdminService {
   async getSettings(messId: string): Promise<SettingsDTO> {
     const entity = await this.settingsRepo.getByMessId(messId);
     if (!entity) {
-      return {
+      return SettingsDTOSchema.parse({
         messId,
         capacity: 200,
         servicePerMin: 12,
@@ -219,7 +220,7 @@ export class AdminService {
         staleCameraSec: 30,
         alertCooldownSec: 180,
         updatedAt: 0,
-      };
+      });
     }
 
     return this.toSettingsDTO(entity);
@@ -355,7 +356,7 @@ export class AdminService {
         ? (entity.alertThresholds['cooldownSec'] as number)
         : 180;
 
-    return {
+    return SettingsDTOSchema.parse({
       messId: entity.messId,
       capacity: entity.seatCapacity,
       servicePerMin: entity.servicePerMin,
@@ -365,6 +366,22 @@ export class AdminService {
       staleCameraSec: entity.staleCameraSec,
       alertCooldownSec,
       updatedAt: entity.updatedAt ? entity.updatedAt.getTime() : 0,
-    };
+      ...(entity.enrolledCount !== undefined ? { enrolledCount: entity.enrolledCount } : {}),
+      ...(entity.defaultEatRate !== undefined ? { defaultEatRate: entity.defaultEatRate } : {}),
+      ...(entity.portionsPerPerson !== undefined ? { portionsPerPerson: entity.portionsPerPerson } : {}),
+      ...(entity.safetyMarginPct !== undefined ? { safetyMarginPct: entity.safetyMarginPct } : {}),
+      ...(entity.counters !== undefined ? { counters: entity.counters } : {}),
+      ...(entity.optOutCutoffMin !== undefined ? { optOutCutoffMin: entity.optOutCutoffMin } : {}),
+      ...(entity.ratingDelayMin !== undefined ? { ratingDelayMin: entity.ratingDelayMin } : {}),
+      ...(entity.walkToMessMin !== undefined ? { walkToMessMin: entity.walkToMessMin } : {}),
+      ...(entity.batchQuality !== undefined ? { batchQuality: entity.batchQuality } : {}),
+      ...(entity.unaccounted !== undefined ? { unaccounted: entity.unaccounted } : {}),
+      ...(entity.randomAudit !== undefined ? { randomAudit: entity.randomAudit } : {}),
+      ...(entity.deviceAnomaly !== undefined ? { deviceAnomaly: entity.deviceAnomaly } : {}),
+      ...(entity.rebate !== undefined ? { rebate: entity.rebate } : {}),
+      ...(entity.autoCalibrateDemand !== undefined ? { autoCalibrateDemand: entity.autoCalibrateDemand } : {}),
+      ...(entity.dpsWeights !== undefined ? { dpsWeights: entity.dpsWeights } : {}),
+      ...(entity.imageRetentionDays !== undefined ? { imageRetentionDays: entity.imageRetentionDays } : {}),
+    });
   }
 }

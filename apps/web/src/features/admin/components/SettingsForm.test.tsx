@@ -2,9 +2,9 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SettingsForm } from './SettingsForm';
-import type { SettingsDTO } from '@messpulse/shared';
+import { SettingsDTOSchema, type SettingsDTO } from '@messpulse/shared';
 
-const mockSettings: SettingsDTO = {
+const mockSettings: SettingsDTO = SettingsDTOSchema.parse({
   messId: 'mess-main-hall',
   capacity: 200,
   servicePerMin: 12,
@@ -14,7 +14,7 @@ const mockSettings: SettingsDTO = {
   staleCameraSec: 30,
   alertCooldownSec: 180,
   updatedAt: 1700000000000,
-};
+});
 
 describe('SettingsForm', () => {
   const mockOnUpdate = vi.fn().mockResolvedValue(true);

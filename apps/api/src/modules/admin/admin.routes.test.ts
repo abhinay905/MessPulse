@@ -10,7 +10,7 @@ import { createAdminRoutes } from './admin.routes';
 import { TokenService } from '../auth/token.service';
 import { createAuthMiddleware } from '../auth/auth.middleware';
 import type { AdminService } from './admin.service';
-import type { SettingsDTO, TimeSeriesPoint, DecayCurveResponse, CheckinTokenResponse } from '@messpulse/shared';
+import { SettingsDTOSchema, type SettingsDTO, type TimeSeriesPoint, type DecayCurveResponse, type CheckinTokenResponse } from '@messpulse/shared';
 import { AppError } from '../../shared-kernel/errors';
 
 describe('Admin Routes & Role Matrix', () => {
@@ -25,7 +25,7 @@ describe('Admin Routes & Role Matrix', () => {
   let mockAdminService: Partial<AdminService>;
   let app: express.Application;
 
-  const mockSettings: SettingsDTO = {
+  const mockSettings: SettingsDTO = SettingsDTOSchema.parse({
     messId: 'mess-main-hall',
     capacity: 200,
     servicePerMin: 12,
@@ -35,7 +35,7 @@ describe('Admin Routes & Role Matrix', () => {
     staleCameraSec: 30,
     alertCooldownSec: 180,
     updatedAt: 1700000000000,
-  };
+  });
 
   const mockSeries: TimeSeriesPoint[] = [
     { ts: 1700000000000, camera: 50, sessionEstimate: 45, decayWeighted: 40, waitMin: 2 },

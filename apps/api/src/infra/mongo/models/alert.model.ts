@@ -9,6 +9,7 @@ export interface IAlertDocument extends Document {
   messId: string;
   mealId: string;
   ruleId: string;
+  subjectKey?: string | undefined; // Phase 2: DOC2 §2.7.2
   severity: 'info' | 'warning' | 'critical';
   payload: Record<string, unknown>;
   raisedAt: number;
@@ -34,6 +35,11 @@ const alertSchema = new Schema<IAlertDocument>(
     ruleId: {
       type: String,
       required: true,
+      trim: true,
+    },
+    subjectKey: {
+      type: String,
+      required: false,
       trim: true,
     },
     severity: {
