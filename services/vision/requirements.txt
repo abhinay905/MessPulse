@@ -1,0 +1,6 @@
+# Pinned dependencies for services/vision (Step 1 Feasibility Spike)
+ultralytics==8.3.16
+opencv-python==4.10.0.84
+requests==2.32.3
+pytest==8.3.3
+lapx==0.10.0
