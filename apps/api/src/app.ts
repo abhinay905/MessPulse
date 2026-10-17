@@ -107,8 +107,16 @@ export function buildApp(
   }
 
   // ─── Static Web Build (DOC2 §2.2 Decision 8, DOC4 Step 11) ─────────────────
-  const webDistPath = path.resolve(__dirname, '../../web/dist');
-  if (fs.existsSync(webDistPath)) {
+  const candidatePaths = [
+    process.env.WEB_DIST_PATH,
+    path.resolve(__dirname, '../../web/dist'),
+    path.resolve(__dirname, '../../../web/dist'),
+    path.resolve(process.cwd(), 'apps/web/dist'),
+    path.resolve(process.cwd(), '../web/dist'),
+  ].filter(Boolean) as string[];
+
+  const webDistPath = candidatePaths.find((p) => fs.existsSync(p));
+  if (webDistPath) {
     app.use(express.static(webDistPath));
     app.get('*', (req: Request, res: Response, next: NextFunction) => {
       if (

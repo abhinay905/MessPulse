@@ -1,0 +1,61 @@
+# docker-compose.demo.yml — Offline zero-dependency demo compose stack
+# Runs API, MongoDB, and Redis locally.
+# DOC4 Step 15.
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - mongo_demo_data:/data/db
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - LOG_LEVEL=info
+      - MONGO_URL=mongodb://mongo:27017/messpulse
+      - REDIS_URL=redis://redis:6379
+      - DEFAULT_MESS_ID=mess-main-hall
+      - JWT_SECRET=demo-secret-key-at-least-32-chars-long-messpulse
+      - OTP_HMAC_SECRET=demo-hmac-secret-at-least-32-chars-messpulse
+      - INGEST_API_KEY=messpulse-demo-camera-key-secret-2026
+      - MEAL_QR_SECRET=demo-meal-qr-secret-key-32-chars-token
+      - ALLOWED_EMAIL_DOMAINS=college.edu,internal,student.edu,iitb.ac.in
+      - MAILER_DRIVER=console
+      - DEMO_MODE=true
+      - ALLOW_SIMULATOR=true
+      - STAFF_DEFAULT_PIN=1234
+      - ADMIN_DEFAULT_PIN=4321
+
+volumes:
+  mongo_demo_data:

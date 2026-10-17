@@ -16,6 +16,7 @@ import { connectMongo, disconnectMongo } from '../src/infra/mongo/connection';
 import { MealModel } from '../src/infra/mongo/models/meal.model';
 import { MessSettingsModel } from '../src/infra/mongo/models/mess-settings.model';
 import { UserModel } from '../src/infra/mongo/models/user.model';
+import { OccupancySnapshotModel } from '../src/infra/mongo/models/occupancy-snapshot.model';
 
 export async function seed(): Promise<void> {
   await connectMongo();
@@ -137,6 +138,41 @@ export async function seed(): Promise<void> {
       },
       { upsert: true, new: true }
     );
+  }
+
+  // 4. Seed 3 days of historical snapshots so best-windows and admin charts have real historical data (DOC4 Step 15)
+  for (const messId of messIds) {
+    for (let dayOffset = 1; dayOffset <= 3; dayOffset++) {
+      const pastDay = new Date(now.getTime() - dayOffset * 24 * 60 * 60 * 1000);
+      const pYear = pastDay.getFullYear();
+      const pMonth = pastDay.getMonth();
+      const pDate = pastDay.getDate();
+      const pDateStr = `${pYear}${String(pMonth + 1).padStart(2, '0')}${String(pDate).padStart(2, '0')}`;
+
+      // Lunch snapshots (12:00 to 14:30 in 15-min intervals)
+      for (let m = 0; m <= 150; m += 15) {
+        const snapTs = new Date(pYear, pMonth, pDate, 12, m, 0).getTime();
+        const distFromPeak = Math.abs(m - 60);
+        const count = Math.max(20, Math.round(150 - (distFromPeak / 90) * 110));
+        const wait = Math.max(1, Math.round(count / 15));
+
+        await OccupancySnapshotModel.findOneAndUpdate(
+          { messId, ts: snapTs },
+          {
+            $set: {
+              messId,
+              mealId: `${pDateStr}-lunch`,
+              ts: snapTs,
+              cameraCount: count,
+              sessionEstimate: Math.round(count * 0.9),
+              decayWeighted: Number((count * 0.85).toFixed(2)),
+              estWaitMin: wait,
+            },
+          },
+          { upsert: true }
+        );
+      }
+    }
   }
 }
 

@@ -3,10 +3,10 @@
 ## Session State
 ```
 PHASE:           1                      (1 = Steps 1–15 MVP · 2 = Steps 16–28 SHOULD/COULD. Only Nilesh changes this.)
-CURRENT_STEP:    Build Step 15 — Demo Hardening and Deployment (v1.0-mvp)
-LAST_COMPLETED:  Build Step 14 — Admin API + UI + Check-In QR (M6)
-SESSION_STATUS:  ACTIVE
-PAUSED_AT:       none
+CURRENT_STEP:    Checkpoint 4 — Phase 1 MVP Complete & Verification Gate
+LAST_COMPLETED:  Build Step 15 — Demo Hardening and Deployment (v1.0-mvp)
+SESSION_STATUS:  CHECKPOINT
+PAUSED_AT:       Checkpoint 4 verification gate (DOC4 §4.3). Phase 1 MVP complete (Steps 1–15). Ready for tag v1.0-mvp and Phase 2 confirmation.
 ```
 Update this block after every completed step and before every session end. Parallel lanes (DOC4 §4.1) each keep their own copy.
 

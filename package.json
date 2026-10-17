@@ -17,6 +17,7 @@
     "lint": "eslint . --max-warnings 0",
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
+    "start": "npm run start -w apps/api",
     "seed": "npm run seed -w apps/api",
     "dev:api": "npm run dev -w apps/api",
     "watch-status": "npm run watch-status -w apps/api",
