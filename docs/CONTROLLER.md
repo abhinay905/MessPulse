@@ -3,8 +3,8 @@
 ## Session State
 ```
 PHASE:           1                      (1 = Steps 1–15 MVP · 2 = Steps 16–28 SHOULD/COULD. Only Nilesh changes this.)
-CURRENT_STEP:    Build Step 4 — Store Ports and Redis / In-Memory Implementations
-LAST_COMPLETED:  Build Step 3 — Pure Domain Core
+CURRENT_STEP:    Build Step 5 — Mongo Repositories and Seed
+LAST_COMPLETED:  Build Step 4 — Store Ports and Redis / In-Memory Implementations
 SESSION_STATUS:  ACTIVE                 (ACTIVE | RESUMING | BLOCKED | CHECKPOINT)
 PAUSED_AT:
 ```
