@@ -1,0 +1,9 @@
+{
+  "name": "@messpulse/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "typecheck": "echo 'web typecheck: Step 11'",
+    "test": "echo 'web tests: Step 11'"
+  }
+}
