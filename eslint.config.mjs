@@ -16,6 +16,7 @@ export default [
       "apps/web/**",
       "**/*.config.ts",
       "**/*.config.mjs",
+      "apps/api/scripts/**",
     ],
   },
   {
