@@ -52,6 +52,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Build web application
+        run: npm run build -w apps/web
+
       - name: Test
         env:
           NODE_ENV: test

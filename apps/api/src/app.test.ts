@@ -7,6 +7,9 @@ import request from 'supertest';
 import type { Application } from 'express';
 import { connectMongo, disconnectMongo } from './infra/mongo/connection';
 
+import fs from 'node:fs';
+import path from 'node:path';
+
 // Set required env vars before importing config
 process.env['NODE_ENV'] = 'test';
 process.env['PORT'] = '3000';
@@ -21,8 +24,16 @@ process.env['DEFAULT_MESS_ID'] = 'mess-default';
 process.env['ALLOW_SIMULATOR'] = 'true';
 
 let app: Application;
+const webDistPath = path.resolve(__dirname, '../../web/dist');
+const indexHtmlPath = path.join(webDistPath, 'index.html');
+let createdDummyWebDist = false;
 
 beforeAll(async () => {
+  if (!fs.existsSync(webDistPath)) {
+    fs.mkdirSync(webDistPath, { recursive: true });
+    fs.writeFileSync(indexHtmlPath, '<!DOCTYPE html><html><body>MessPulse</body></html>');
+    createdDummyWebDist = true;
+  }
   await connectMongo();
   const { buildApp } = await import('./app');
   app = buildApp();
@@ -30,6 +41,9 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await disconnectMongo();
+  if (createdDummyWebDist) {
+    fs.rmSync(webDistPath, { recursive: true, force: true });
+  }
 });
 
 describe('GET /healthz', () => {
