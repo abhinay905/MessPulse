@@ -19,6 +19,7 @@ import { createOccupancyRoutes } from './modules/occupancy/occupancy.routes';
 import { createSessionsRoutes } from './modules/sessions/sessions.routes';
 import { createSimulatorRoutes } from './modules/simulator/simulator.routes';
 import { createAlertsRoutes } from './modules/alerts/alerts.routes';
+import { createAdminRoutes } from './modules/admin/admin.routes';
 
 export function buildApp(
   container: Container = buildContainer(),
@@ -97,6 +98,10 @@ export function buildApp(
   app.use('/api/v1/staff', alertsRoutes);
   app.use('/staff', alertsRoutes);
 
+  const adminRoutes = createAdminRoutes(container.adminService, container.authMiddleware);
+  app.use('/api/v1/admin', adminRoutes);
+  app.use('/admin', adminRoutes);
+
   if (configureExtraRoutes) {
     configureExtraRoutes(app);
   }
@@ -111,7 +116,11 @@ export function buildApp(
         req.path.startsWith('/healthz') ||
         req.path.startsWith('/readyz') ||
         req.path.startsWith('/sessions') ||
-        req.path.startsWith('/admin')
+        req.path.startsWith('/staff/alerts') ||
+        req.path.startsWith('/staff/meals') ||
+        req.path.startsWith('/admin/mess') ||
+        req.path.startsWith('/admin/meals') ||
+        req.path.startsWith('/admin/simulator')
       ) {
         return next();
       }

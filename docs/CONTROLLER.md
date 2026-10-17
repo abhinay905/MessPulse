@@ -3,8 +3,8 @@
 ## Session State
 ```
 PHASE:           1                      (1 = Steps 1–15 MVP · 2 = Steps 16–28 SHOULD/COULD. Only Nilesh changes this.)
-CURRENT_STEP:    Build Step 14 — Admin API + UI + Check-In QR (M6)
-LAST_COMPLETED:  Build Step 13 — Alerts and Staff Controller (M5)
+CURRENT_STEP:    Build Step 15 — Demo Hardening and Deployment (v1.0-mvp)
+LAST_COMPLETED:  Build Step 14 — Admin API + UI + Check-In QR (M6)
 SESSION_STATUS:  ACTIVE
 PAUSED_AT:       none
 ```

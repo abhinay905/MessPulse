@@ -48,6 +48,7 @@ import { AlertEngine } from './modules/alerts/alert-engine';
 import { TrayDepletionRule } from './modules/alerts/rules/tray-depletion.rule';
 import { AlertService } from './modules/alerts/alerts.service';
 import { SimulatorService } from './modules/simulator/simulator.service';
+import { AdminService } from './modules/admin/admin.service';
 
 export interface Container {
   clock: SwitchableClock;
@@ -60,6 +61,7 @@ export interface Container {
   alertRepo: AlertRepository;
   alertEngine: AlertEngine;
   alertsService: AlertService;
+  adminService: AdminService;
   otpStore: OtpStore;
   cameraStore: CameraReadingStore;
   velocityStore: EntryVelocityStore;
@@ -86,6 +88,7 @@ export interface ContainerOverrides {
   alertRepo?: AlertRepository | undefined;
   alertEngine?: AlertEngine | undefined;
   alertsService?: AlertService | undefined;
+  adminService?: AdminService | undefined;
   otpStore?: OtpStore | undefined;
   cameraStore?: CameraReadingStore | undefined;
   velocityStore?: EntryVelocityStore | undefined;
@@ -251,6 +254,18 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
       defaultMessId: config.DEFAULT_MESS_ID,
     });
 
+  const adminService =
+    overrides.adminService ??
+    new AdminService(
+      snapshotRepo,
+      settingsRepo,
+      mealRepo,
+      sessionStore,
+      eventBus,
+      clock,
+      config.JWT_SECRET
+    );
+
   return {
     clock,
     eventBus,
@@ -262,6 +277,7 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
     alertRepo,
     alertEngine,
     alertsService,
+    adminService,
     otpStore,
     cameraStore,
     velocityStore,

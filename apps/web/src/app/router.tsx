@@ -9,6 +9,7 @@ import { LoginPage } from '../features/auth/LoginPage';
 import { StudentPage } from '../features/student/StudentPage';
 import { CheckInPage } from '../features/student/CheckInPage';
 import { StaffPage } from '../features/staff/StaffPage';
+import { AdminPage } from '../features/admin/AdminPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -37,6 +38,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute allowedRoles={['staff', 'admin']}>
         <StaffPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin',
+    element: (
+      <ProtectedRoute allowedRoles={['admin']}>
+        <AdminPage />
       </ProtectedRoute>
     ),
   },

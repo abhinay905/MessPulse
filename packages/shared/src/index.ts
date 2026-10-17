@@ -159,8 +159,53 @@ export type SettingsDTO = z.infer<typeof SettingsDTOSchema>;
 
 export const SettingsPatchSchema = SettingsDTOSchema
   .omit({ messId: true, updatedAt: true })
-  .partial();
+  .partial()
+  .strict();
 export type SettingsPatch = z.infer<typeof SettingsPatchSchema>;
+
+// ─── Admin Analytics Contracts (DOC3 §3.7) ───────────────────────────────────
+
+export const TimeSeriesPointSchema = z.object({
+  ts: z.number().int(),
+  camera: z.number().nonnegative(),
+  sessionEstimate: z.number().nonnegative(),
+  decayWeighted: z.number().nonnegative(),
+  waitMin: z.number().nonnegative(),
+});
+export type TimeSeriesPoint = z.infer<typeof TimeSeriesPointSchema>;
+
+export const DecayCurvePointSchema = z.object({
+  offsetMin: z.number(),
+  weight: z.number().min(0).max(1),
+});
+export type DecayCurvePoint = z.infer<typeof DecayCurvePointSchema>;
+
+export const LiveHistogramBinSchema = z.object({
+  bin: z.string(),
+  count: z.number().int().nonnegative(),
+});
+export type LiveHistogramBin = z.infer<typeof LiveHistogramBinSchema>;
+
+export const DecayCurveResponseSchema = z.object({
+  theoretical: z.array(DecayCurvePointSchema),
+  liveHistogram: z.array(LiveHistogramBinSchema),
+  activeSessions: z.number().int().nonnegative(),
+});
+export type DecayCurveResponse = z.infer<typeof DecayCurveResponseSchema>;
+
+export const CheckinTokenResponseSchema = z.object({
+  token: z.string(),
+  url: z.string(),
+  expiresAt: z.number().int(),
+});
+export type CheckinTokenResponse = z.infer<typeof CheckinTokenResponseSchema>;
+
+export const CameraHealthSchema = z.object({
+  lastSeenAt: z.number().int().nullable(),
+  stale: z.boolean(),
+  learnedRatio: z.number().optional(),
+});
+export type CameraHealth = z.infer<typeof CameraHealthSchema>;
 
 // ─── Socket Event Names ───────────────────────────────────────────────────────
 
