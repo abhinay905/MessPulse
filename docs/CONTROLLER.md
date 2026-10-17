@@ -3,8 +3,8 @@
 ## Session State
 ```
 PHASE:           1                      (1 = Steps 1–15 MVP · 2 = Steps 16–28 SHOULD/COULD. Only Nilesh changes this.)
-CURRENT_STEP:    Build Step 6 — Auth and Roles (M7)
-LAST_COMPLETED:  Build Step 5 — Mongo Repositories and Seed
+CURRENT_STEP:    Build Step 7 — Ingest Endpoint and Vision Reporter (M1)
+LAST_COMPLETED:  Build Step 6 — Auth and Roles (M7)
 SESSION_STATUS:  ACTIVE                 (ACTIVE | RESUMING | BLOCKED | CHECKPOINT)
 PAUSED_AT:
 ```

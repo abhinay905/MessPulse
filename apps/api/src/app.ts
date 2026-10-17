@@ -4,12 +4,18 @@
  * Exposes /healthz and /readyz stubs for Docker/Railway health checks.
  * DOC3 §3.1 — request-id, JSON parser, error middleware, no domain logic here.
  */
+
 import express, { type Request, type Response, type NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import { AppError } from './shared-kernel/errors';
 import { logger } from './infra/logger';
+import { buildContainer, type Container } from './container';
+import { createAuthRoutes } from './modules/auth/auth.routes';
 
-export function buildApp(): express.Application {
+export function buildApp(
+  container: Container = buildContainer(),
+  configureExtraRoutes?: (app: express.Application) => void
+): express.Application {
   const app = express();
 
   // ─── Request-id ─────────────────────────────────────────────────────────────
@@ -32,6 +38,13 @@ export function buildApp(): express.Application {
   app.get('/readyz', (_req: Request, res: Response) => {
     res.status(200).json({ status: 'ok', checks: { api: 'ok' } });
   });
+
+  // ─── Feature Routes ──────────────────────────────────────────────────────────
+  app.use('/api/v1/auth', createAuthRoutes(container.authService, container.authMiddleware));
+
+  if (configureExtraRoutes) {
+    configureExtraRoutes(app);
+  }
 
   // ─── Error middleware (must be last) ─────────────────────────────────────────
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

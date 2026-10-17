@@ -12,6 +12,39 @@ import { z } from 'zod';
 export const RoleSchema = z.enum(['student', 'staff', 'admin']);
 export type Role = z.infer<typeof RoleSchema>;
 
+// ─── Auth Contracts (DOC2 §2.4, DOC3 §3.8) ────────────────────────────────────
+
+export const OtpRequestSchema = z.object({
+  email: z.string().email('Valid email is required'),
+});
+export type OtpRequest = z.infer<typeof OtpRequestSchema>;
+
+export const OtpVerifySchema = z.object({
+  email: z.string().email('Valid email is required'),
+  code: z.string().regex(/^\d{6}$/, 'OTP must be a 6-digit numeric code'),
+});
+export type OtpVerify = z.infer<typeof OtpVerifySchema>;
+
+export const StaffLoginSchema = z.object({
+  identifier: z.string().min(1, 'Email or username is required'),
+  pin: z.string().min(1, 'PIN is required'),
+});
+export type StaffLogin = z.infer<typeof StaffLoginSchema>;
+
+export const AuthUserSchema = z.object({
+  id: z.string(),
+  role: RoleSchema,
+  name: z.string(),
+  email: z.string().email(),
+});
+export type AuthUser = z.infer<typeof AuthUserSchema>;
+
+export const AuthResponseSchema = z.object({
+  token: z.string(),
+  user: AuthUserSchema,
+});
+export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+
 // ─── Live Count Payload (POST /mess/live-count from vision script) ─────────────
 
 export const LiveCountPayloadSchema = z.object({

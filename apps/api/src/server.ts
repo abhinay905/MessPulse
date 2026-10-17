@@ -9,7 +9,7 @@ import { buildApp } from './app';
 import { logger } from './infra/logger';
 
 const container = buildContainer();
-const app = buildApp();
+const app = buildApp(container);
 
 const server = app.listen(config.PORT, () => {
   logger.info({ port: config.PORT, env: config.NODE_ENV }, 'MessPulse API started');
