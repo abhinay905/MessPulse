@@ -20,40 +20,42 @@ import { UserModel } from '../src/infra/mongo/models/user.model';
 export async function seed(): Promise<void> {
   await connectMongo();
 
-  const messId = 'hostel-mess-1';
+  const messIds = Array.from(new Set([process.env.DEFAULT_MESS_ID || 'mess-main-hall', 'hostel-mess-1']));
 
-  // 1. Seed Default MessSettings
-  await MessSettingsModel.findOneAndUpdate(
-    { messId },
-    {
-      $set: {
-        messId,
-        name: 'Hostel Main Mess',
-        seatCapacity: 200,
-        servicePerMin: 15,
-        geofence: {
-          lat: 12.9716,
-          lng: 77.5946,
-          radiusM: 100,
-        },
-        baseMealMin: 18,
-        maxSessionMin: 60,
-        decay: {
-          tail: [
-            { untilOffsetMin: 8, weight: 0.6 },
-            { untilOffsetMin: 17, weight: 0.25 },
-          ],
-        },
-        staleCameraSec: 30,
-        alertThresholds: {
-          warnRatio: 0.85,
-          clearRatio: 0.7,
-          horizonMin: 10,
+  // 1. Seed Default MessSettings for all messIds
+  for (const messId of messIds) {
+    await MessSettingsModel.findOneAndUpdate(
+      { messId },
+      {
+        $set: {
+          messId,
+          name: messId === 'mess-main-hall' ? 'Main Dining Hall' : 'Hostel Main Mess',
+          seatCapacity: 200,
+          servicePerMin: 15,
+          geofence: {
+            lat: 12.9716,
+            lng: 77.5946,
+            radiusM: 100,
+          },
+          baseMealMin: 18,
+          maxSessionMin: 60,
+          decay: {
+            tail: [
+              { untilOffsetMin: 8, weight: 0.6 },
+              { untilOffsetMin: 17, weight: 0.25 },
+            ],
+          },
+          staleCameraSec: 30,
+          alertThresholds: {
+            warnRatio: 0.85,
+            clearRatio: 0.7,
+            horizonMin: 10,
+          },
         },
       },
-    },
-    { upsert: true, new: true }
-  );
+      { upsert: true, new: true }
+    );
+  }
 
   // 2. Seed Staff and Admin users
   const staffPin = process.env.STAFF_DEFAULT_PIN || '1234';
@@ -88,7 +90,7 @@ export async function seed(): Promise<void> {
     { upsert: true, new: true }
   );
 
-  // 3. Seed Today's Lunch and Dinner
+  // 3. Seed Today's Lunch and Dinner for each mess
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -101,39 +103,41 @@ export async function seed(): Promise<void> {
   const dinnerStart = new Date(year, now.getMonth(), now.getDate(), 19, 30, 0).getTime();
   const dinnerEnd = new Date(year, now.getMonth(), now.getDate(), 22, 0, 0).getTime();
 
-  await MealModel.findOneAndUpdate(
-    { messId, mealId: `${dateStr}-lunch` },
-    {
-      $set: {
-        messId,
-        mealId: `${dateStr}-lunch`,
-        type: 'lunch',
-        startsAt: lunchStart,
-        endsAt: lunchEnd,
-        menuItems: ['Dal Tadka', 'Jeera Rice', 'Paneer Butter Masala', 'Roti', 'Salad'],
-        menuDemandFactorMin: 2,
-        trayCapacity: 400,
+  for (const messId of messIds) {
+    await MealModel.findOneAndUpdate(
+      { messId, mealId: `${dateStr}-lunch` },
+      {
+        $set: {
+          messId,
+          mealId: `${dateStr}-lunch`,
+          type: 'lunch',
+          startsAt: lunchStart,
+          endsAt: lunchEnd,
+          menuItems: ['Dal Tadka', 'Jeera Rice', 'Paneer Butter Masala', 'Roti', 'Salad'],
+          menuDemandFactorMin: 2,
+          trayCapacity: 400,
+        },
       },
-    },
-    { upsert: true, new: true }
-  );
+      { upsert: true, new: true }
+    );
 
-  await MealModel.findOneAndUpdate(
-    { messId, mealId: `${dateStr}-dinner` },
-    {
-      $set: {
-        messId,
-        mealId: `${dateStr}-dinner`,
-        type: 'dinner',
-        startsAt: dinnerStart,
-        endsAt: dinnerEnd,
-        menuItems: ['Mix Veg', 'Steamed Rice', 'Dal Fry', 'Roti', 'Gulab Jamun'],
-        menuDemandFactorMin: 1,
-        trayCapacity: 400,
+    await MealModel.findOneAndUpdate(
+      { messId, mealId: `${dateStr}-dinner` },
+      {
+        $set: {
+          messId,
+          mealId: `${dateStr}-dinner`,
+          type: 'dinner',
+          startsAt: dinnerStart,
+          endsAt: dinnerEnd,
+          menuItems: ['Mix Veg', 'Steamed Rice', 'Dal Fry', 'Roti', 'Gulab Jamun'],
+          menuDemandFactorMin: 1,
+          trayCapacity: 400,
+        },
       },
-    },
-    { upsert: true, new: true }
-  );
+      { upsert: true, new: true }
+    );
+  }
 }
 
 // Execute directly if run as a script

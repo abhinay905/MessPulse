@@ -33,12 +33,15 @@ import type {
   MealRepository,
   SettingsRepository,
   SnapshotRepository,
+  CheckInRepository,
 } from './core/ports';
 import { TokenService } from './modules/auth/token.service';
 import { AuthService } from './modules/auth/auth.service';
 import { createAuthMiddleware } from './modules/auth/auth.middleware';
 import { IngestService } from './modules/ingest/ingest.service';
 import { OccupancyService } from './modules/occupancy/occupancy.service';
+import { SessionService } from './modules/sessions/sessions.service';
+import { MongoCheckInRepository } from './infra/mongo/check-in.repository';
 
 export interface Container {
   clock: SwitchableClock;
@@ -47,6 +50,7 @@ export interface Container {
   mealRepo: MealRepository;
   settingsRepo: SettingsRepository;
   snapshotRepo: SnapshotRepository;
+  checkInRepo: CheckInRepository;
   otpStore: OtpStore;
   cameraStore: CameraReadingStore;
   velocityStore: EntryVelocityStore;
@@ -57,6 +61,7 @@ export interface Container {
   authMiddleware: ReturnType<typeof createAuthMiddleware>;
   ingestService: IngestService;
   occupancyService: OccupancyService;
+  sessionsService: SessionService;
   redis?: Redis | undefined;
 }
 
@@ -67,6 +72,7 @@ export interface ContainerOverrides {
   mealRepo?: MealRepository | undefined;
   settingsRepo?: SettingsRepository | undefined;
   snapshotRepo?: SnapshotRepository | undefined;
+  checkInRepo?: CheckInRepository | undefined;
   otpStore?: OtpStore | undefined;
   cameraStore?: CameraReadingStore | undefined;
   velocityStore?: EntryVelocityStore | undefined;
@@ -76,6 +82,7 @@ export interface ContainerOverrides {
   authService?: AuthService | undefined;
   ingestService?: IngestService | undefined;
   occupancyService?: OccupancyService | undefined;
+  sessionsService?: SessionService | undefined;
   redis?: Redis | undefined;
 }
 
@@ -133,6 +140,7 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
   const mealRepo = overrides.mealRepo ?? new MongoMealRepository();
   const settingsRepo = overrides.settingsRepo ?? new MongoSettingsRepository();
   const snapshotRepo = overrides.snapshotRepo ?? new MongoSnapshotRepository();
+  const checkInRepo = overrides.checkInRepo ?? new MongoCheckInRepository();
 
   let mailer: Mailer;
   if (overrides.mailer) {
@@ -174,6 +182,20 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
       config.DEFAULT_MESS_ID
     );
 
+  const sessionsService =
+    overrides.sessionsService ??
+    new SessionService(
+      sessionStore,
+      checkInRepo,
+      mealRepo,
+      settingsRepo,
+      occupancyService,
+      eventBus,
+      clock,
+      config.JWT_SECRET,
+      config.DEFAULT_MESS_ID
+    );
+
   return {
     clock,
     eventBus,
@@ -181,6 +203,7 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
     mealRepo,
     settingsRepo,
     snapshotRepo,
+    checkInRepo,
     otpStore,
     cameraStore,
     velocityStore,
@@ -191,6 +214,7 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
     authMiddleware,
     ingestService,
     occupancyService,
+    sessionsService,
     redis,
   };
 }

@@ -22,8 +22,13 @@ export abstract class AppError extends Error {
 
 /** 422 — request body fails business validation (not a schema issue; use zod for that). */
 export class ValidationError extends AppError {
-  readonly code = 'VALIDATION_ERROR';
+  readonly code: string;
   readonly httpStatus = 422;
+
+  constructor(message: string, details?: unknown, code = 'VALIDATION_ERROR') {
+    super(message, details);
+    this.code = code;
+  }
 }
 
 /** 401 — unauthenticated. Never reveal whether email exists. */
@@ -46,8 +51,13 @@ export class NotFoundError extends AppError {
 
 /** 409 — state conflict (e.g. already checked in). */
 export class ConflictError extends AppError {
-  readonly code = 'CONFLICT';
+  readonly code: string;
   readonly httpStatus = 409;
+
+  constructor(message: string, details?: unknown, code = 'CONFLICT') {
+    super(message, details);
+    this.code = code;
+  }
 }
 
 /** 429 — rate limit or attempt-count exceeded. */

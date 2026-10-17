@@ -112,6 +112,19 @@ export const SessionDTOSchema = z.object({
 });
 export type SessionDTO = z.infer<typeof SessionDTOSchema>;
 
+export const CheckInRequestSchema = z.object({
+  mealToken: z.string().min(1, 'mealToken is required'),
+  geo: z
+    .object({
+      lat: z.number(),
+      lng: z.number(),
+      accuracy: z.number().optional(),
+      accuracyM: z.number().optional(),
+    })
+    .optional(),
+});
+export type CheckInRequest = z.infer<typeof CheckInRequestSchema>;
+
 // ─── Alert DTO ────────────────────────────────────────────────────────────────
 
 export const AlertSeveritySchema = z.enum(['info', 'warning', 'critical']);

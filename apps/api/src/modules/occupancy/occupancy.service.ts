@@ -284,4 +284,16 @@ export class OccupancyService {
   getLatest(messId = this.defaultMessId): StatusSnapshot {
     return this.cachedSnapshots.get(messId) ?? this.warmingUpSnapshot(messId, Date.now());
   }
+
+  /**
+   * Implements QueueWaitProvider for SessionsService (DOC3 §3.4).
+   * Returns estimated wait in seconds for the given meal, or 0 if no wait / not matching.
+   */
+  async getEstimatedWaitSec(mealId: string, messId = this.defaultMessId): Promise<number> {
+    const snapshot = this.getLatest(messId);
+    if (snapshot.mealId === mealId && snapshot.waitMin > 0) {
+      return Math.round(snapshot.waitMin * 60);
+    }
+    return 0;
+  }
 }

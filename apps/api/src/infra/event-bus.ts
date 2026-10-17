@@ -11,7 +11,7 @@ import type { StatusSnapshot, AlertDTO } from '@messpulse/shared';
 export interface EventPayloadMap {
   'reading.recorded': { messId: string; mealId: string | null; seq: number; count: number; inCountDelta: number };
   'session.started': { messId: string; mealId: string; sessionId: string; userId: string };
-  'session.ended': { messId: string; mealId: string; sessionId: string; reason: 'early' | 'expired' };
+  'session.ended': { messId: string; mealId: string; sessionId: string; reason: 'early' | 'manual' | 'expired' };
   'status.updated': StatusSnapshot;
   'alert.raised': AlertDTO;
   'alert.cleared': { id: string; mealId: string; ruleId: string; clearedAt: number };

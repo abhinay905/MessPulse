@@ -28,7 +28,7 @@ async function bootstrap() {
   });
 
   const realtimeGateway = new RealtimeGateway(io, container.eventBus, container.tokenService);
-  const scheduler = new Scheduler(container.occupancyService, container.clock);
+  const scheduler = new Scheduler(container.occupancyService, container.sessionsService, container.clock);
 
   scheduler.start();
 

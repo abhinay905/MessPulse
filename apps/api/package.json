@@ -10,7 +10,8 @@
     "start": "node dist/server.js",
     "test": "vitest run --coverage",
     "seed": "ts-node -r tsconfig-paths/register scripts/seed.ts",
-    "watch-status": "ts-node -r tsconfig-paths/register scripts/watch-status.ts"
+    "watch-status": "ts-node -r tsconfig-paths/register scripts/watch-status.ts",
+    "print-checkin-url": "ts-node -r tsconfig-paths/register scripts/print-checkin-url.ts"
   },
   "dependencies": {
     "@messpulse/shared": "*",

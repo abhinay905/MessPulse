@@ -8,12 +8,17 @@ import { logger } from './logger';
 import type { OccupancyService } from '../modules/occupancy/occupancy.service';
 import type { Clock } from '../core/ports';
 
+export interface ReaperJob {
+  reap(now: number): Promise<number>;
+}
+
 export class Scheduler {
   private timers: NodeJS.Timeout[] = [];
   private isRunning = false;
 
   constructor(
     private readonly occupancyService: OccupancyService,
+    private readonly sessionReaper: ReaperJob,
     private readonly clock: Clock
   ) {}
 
@@ -33,7 +38,17 @@ export class Scheduler {
     }, 1000);
     this.timers.push(tickTimer);
 
-    logger.info('Scheduler started: [occupancy.tick (1s)]');
+    // 5-second Sessions reaper
+    const reaperTimer = setInterval(async () => {
+      try {
+        await this.sessionReaper.reap(this.clock.now());
+      } catch (err) {
+        logger.error({ err }, 'Scheduler job failed [sessions.reaper]');
+      }
+    }, 5000);
+    this.timers.push(reaperTimer);
+
+    logger.info('Scheduler started: [occupancy.tick (1s), sessions.reaper (5s)]');
   }
 
   stop(): void {

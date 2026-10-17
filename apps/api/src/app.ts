@@ -14,6 +14,7 @@ import { buildContainer, type Container } from './container';
 import { createAuthRoutes } from './modules/auth/auth.routes';
 import { createIngestRoutes } from './modules/ingest/ingest.routes';
 import { createOccupancyRoutes } from './modules/occupancy/occupancy.routes';
+import { createSessionsRoutes } from './modules/sessions/sessions.routes';
 
 export function buildApp(
   container: Container = buildContainer(),
@@ -80,6 +81,9 @@ export function buildApp(
     )
   );
   app.use('/api/v1/mess', createOccupancyRoutes(container.occupancyService));
+  const sessionsRoutes = createSessionsRoutes(container.sessionsService, container.authMiddleware);
+  app.use('/api/v1/sessions', sessionsRoutes);
+  app.use('/sessions', sessionsRoutes);
 
   if (configureExtraRoutes) {
     configureExtraRoutes(app);
