@@ -3,6 +3,7 @@
  * App refuses to start if any required variable is missing or malformed.
  * DOC3 §3.1: config/ is the only place that reads process.env.
  */
+import path from 'path';
 import { z } from 'zod';
 
 const EnvSchema = z.object({
@@ -30,6 +31,21 @@ const EnvSchema = z.object({
 });
 
 function loadConfig() {
+  if (typeof process.loadEnvFile === 'function') {
+    const candidates = [
+      path.resolve(process.cwd(), '.env'),
+      path.resolve(__dirname, '../../../.env'),
+      path.resolve(__dirname, '../../.env'),
+    ];
+    for (const envPath of candidates) {
+      try {
+        process.loadEnvFile(envPath);
+      } catch {
+        // Continue to next candidate
+      }
+    }
+  }
+
   const result = EnvSchema.safeParse(process.env);
   if (!result.success) {
     const issues = result.error.issues

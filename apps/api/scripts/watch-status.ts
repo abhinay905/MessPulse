@@ -8,9 +8,25 @@
  *   npx ts-node -r tsconfig-paths/register scripts/watch-status.ts
  */
 
+import path from 'path';
 import { io, type Socket } from 'socket.io-client';
 import { StatusSnapshotSchema, type StatusSnapshot } from '@messpulse/shared';
 import jwt from 'jsonwebtoken';
+
+if (typeof process.loadEnvFile === 'function') {
+  const candidates = [
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(__dirname, '../../../.env'),
+    path.resolve(__dirname, '../../.env'),
+  ];
+  for (const envPath of candidates) {
+    try {
+      process.loadEnvFile(envPath);
+    } catch {
+      // try next
+    }
+  }
+}
 
 const SERVER_URL = process.env.API_URL || 'http://localhost:3000';
 const JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret-min-16-characters-long';
