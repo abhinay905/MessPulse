@@ -7,6 +7,8 @@
 
 import express, { type Request, type Response, type NextFunction } from 'express';
 import { randomUUID } from 'crypto';
+import path from 'path';
+import fs from 'fs';
 import mongoose from 'mongoose';
 import { AppError } from './shared-kernel/errors';
 import { logger } from './infra/logger';
@@ -92,6 +94,24 @@ export function buildApp(
 
   if (configureExtraRoutes) {
     configureExtraRoutes(app);
+  }
+
+  // ─── Static Web Build (DOC2 §2.2 Decision 8, DOC4 Step 11) ─────────────────
+  const webDistPath = path.resolve(__dirname, '../../web/dist');
+  if (fs.existsSync(webDistPath)) {
+    app.use(express.static(webDistPath));
+    app.get('*', (req: Request, res: Response, next: NextFunction) => {
+      if (
+        req.path.startsWith('/api') ||
+        req.path.startsWith('/healthz') ||
+        req.path.startsWith('/readyz') ||
+        req.path.startsWith('/sessions') ||
+        req.path.startsWith('/admin')
+      ) {
+        return next();
+      }
+      res.sendFile(path.join(webDistPath, 'index.html'));
+    });
   }
 
   // ─── Error middleware (must be last) ─────────────────────────────────────────

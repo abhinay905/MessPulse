@@ -53,9 +53,17 @@ describe('GET /readyz', () => {
   });
 });
 
-describe('Unknown route', () => {
-  it('returns 404', async () => {
-    const res = await request(app).get('/does-not-exist');
+describe('Unknown API route', () => {
+  it('returns 404 for unknown api endpoint', async () => {
+    const res = await request(app).get('/api/does-not-exist');
     expect(res.status).toBe(404);
+  });
+});
+
+describe('SPA fallback in production', () => {
+  it('serves web index.html for client routes', async () => {
+    const res = await request(app).get('/student');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('text/html');
   });
 });
