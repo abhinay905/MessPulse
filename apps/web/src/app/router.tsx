@@ -7,6 +7,7 @@ import React from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '../features/auth/LoginPage';
 import { StudentPage } from '../features/student/StudentPage';
+import { CheckInPage } from '../features/student/CheckInPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -19,6 +20,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute allowedRoles={['student', 'staff', 'admin']}>
         <StudentPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/student/checkin',
+    element: (
+      <ProtectedRoute allowedRoles={['student', 'staff', 'admin']}>
+        <CheckInPage />
       </ProtectedRoute>
     ),
   },

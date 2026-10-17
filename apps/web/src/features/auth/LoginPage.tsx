@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { UtensilsCrossed, Sparkles } from 'lucide-react';
 import { useAuth } from './useAuth';
 import { OtpForm } from './OtpForm';
@@ -9,9 +9,16 @@ import { Card } from '../../components/ui/Card';
 export const LoginPage: React.FC = () => {
   const [tab, setTab] = useState<'student' | 'staff'>('student');
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   const handleSuccess = () => {
+    const fromLoc = (location.state as { from?: { pathname?: string; search?: string } })?.from;
+    if (fromLoc?.pathname) {
+      navigate(`${fromLoc.pathname}${fromLoc.search || ''}`, { replace: true });
+      return;
+    }
+
     if (user?.role === 'admin') {
       navigate('/admin');
     } else if (user?.role === 'staff') {

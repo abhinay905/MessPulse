@@ -3,10 +3,10 @@
 ## Session State
 ```
 PHASE:           1                      (1 = Steps 1–15 MVP · 2 = Steps 16–28 SHOULD/COULD. Only Nilesh changes this.)
-CURRENT_STEP:    Build Step 12 — Student Check-In UI (M3 UI)
-LAST_COMPLETED:  Build Step 11 — Web Scaffold, Auth Screens, Student Live View (M2 UI)
-SESSION_STATUS:  ACTIVE                 (ACTIVE | RESUMING | BLOCKED | CHECKPOINT)
-PAUSED_AT:       none
+CURRENT_STEP:    CHECKPOINT 3 — after Steps 11–12 (student journey)
+LAST_COMPLETED:  Build Step 12 — Student Check-In UI (M3 UI)
+SESSION_STATUS:  CHECKPOINT
+PAUSED_AT:       CHECKPOINT 3 (DOC4 §4.3)
 ```
 Update this block after every completed step and before every session end. Parallel lanes (DOC4 §4.1) each keep their own copy.
 

@@ -8,6 +8,16 @@ import * as useAuthModule from '../auth/useAuth';
 
 vi.mock('./hooks/useLiveStatus');
 vi.mock('../auth/useAuth');
+vi.mock('./hooks/useActiveSession', () => ({
+  useActiveSession: () => ({
+    session: null,
+    isLoading: false,
+    remainingSec: 0,
+    checkIn: vi.fn(),
+    endSession: vi.fn(),
+    refetch: vi.fn(),
+  }),
+}));
 
 const mockSnapshot: StatusSnapshot = {
   messId: 'mess-main-hall',

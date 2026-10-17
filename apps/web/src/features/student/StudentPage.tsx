@@ -15,6 +15,7 @@ import { useLiveStatus } from './hooks/useLiveStatus';
 import { OccupancyGauge } from './components/OccupancyGauge';
 import { WaitTimeCard } from './components/WaitTimeCard';
 import { BestWindows } from './components/BestWindows';
+import { CheckInCard } from './components/CheckInCard';
 import { Card } from '../../components/ui/Card';
 import { formatSecondsAgo } from '../../lib/format';
 
@@ -123,6 +124,9 @@ export const StudentPage: React.FC = () => {
 
             {/* Occupancy Gauge Card */}
             <OccupancyGauge snapshot={snapshot} />
+
+            {/* Check-In Card / Active Session */}
+            <CheckInCard />
 
             {/* Queue Wait Time Card */}
             <WaitTimeCard snapshot={snapshot} />
