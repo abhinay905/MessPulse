@@ -1,17 +1,19 @@
 /**
  * app.ts — Express app factory.
  * Builds the app from the container without calling listen().
- * Exposes /healthz and /readyz stubs for Docker/Railway health checks.
+ * Exposes /healthz and /readyz (checks Redis + Mongo).
  * DOC3 §3.1 — request-id, JSON parser, error middleware, no domain logic here.
  */
 
 import express, { type Request, type Response, type NextFunction } from 'express';
 import { randomUUID } from 'crypto';
+import mongoose from 'mongoose';
 import { AppError } from './shared-kernel/errors';
 import { logger } from './infra/logger';
 import { buildContainer, type Container } from './container';
 import { createAuthRoutes } from './modules/auth/auth.routes';
 import { createIngestRoutes } from './modules/ingest/ingest.routes';
+import { createOccupancyRoutes } from './modules/occupancy/occupancy.routes';
 
 export function buildApp(
   container: Container = buildContainer(),
@@ -35,9 +37,36 @@ export function buildApp(
     res.status(200).json({ status: 'ok' });
   });
 
-  // /readyz will be enhanced in Step 8 with real Redis/Mongo checks
-  app.get('/readyz', (_req: Request, res: Response) => {
-    res.status(200).json({ status: 'ok', checks: { api: 'ok' } });
+  // /readyz — reports Redis and Mongo readiness (DOC4 Step 8)
+  app.get('/readyz', async (_req: Request, res: Response) => {
+    let mongoOk = false;
+    try {
+      mongoOk = mongoose.connection.readyState === 1;
+    } catch {
+      mongoOk = false;
+    }
+
+    let redisOk = false;
+    try {
+      if (container.redis) {
+        const pingRes = await container.redis.ping();
+        redisOk = pingRes === 'PONG';
+      } else {
+        redisOk = true; // In-memory fallback
+      }
+    } catch {
+      redisOk = false;
+    }
+
+    const isReady = mongoOk && redisOk;
+    res.status(isReady ? 200 : 503).json({
+      status: isReady ? 'ok' : 'degraded',
+      checks: {
+        api: 'ok',
+        mongo: mongoOk ? 'ok' : 'down',
+        redis: redisOk ? 'ok' : 'down',
+      },
+    });
   });
 
   // ─── Feature Routes ──────────────────────────────────────────────────────────
@@ -50,6 +79,7 @@ export function buildApp(
       container.authMiddleware.requireIngestKey
     )
   );
+  app.use('/api/v1/mess', createOccupancyRoutes(container.occupancyService));
 
   if (configureExtraRoutes) {
     configureExtraRoutes(app);

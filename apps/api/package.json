@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "start": "node dist/server.js",
     "test": "vitest run --coverage",
-    "seed": "ts-node -r tsconfig-paths/register scripts/seed.ts"
+    "seed": "ts-node -r tsconfig-paths/register scripts/seed.ts",
+    "watch-status": "ts-node -r tsconfig-paths/register scripts/watch-status.ts"
   },
   "dependencies": {
     "@messpulse/shared": "*",
@@ -35,6 +36,7 @@
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^10.0.0",
     "@vitest/coverage-v8": "^2.1.9",
+    "socket.io-client": "^4.8.4",
     "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",

@@ -11,12 +11,16 @@ import { SwitchableClock } from './infra/clock';
 import { EventBus } from './infra/event-bus';
 import { MongoUserRepository } from './infra/mongo/user.repository';
 import { MongoMealRepository } from './infra/mongo/meal.repository';
+import { MongoSettingsRepository } from './infra/mongo/mess-settings.repository';
+import { MongoSnapshotRepository } from './infra/mongo/snapshot.repository';
 import { RedisOtpStore } from './infra/redis/otp-store.redis';
 import { InMemoryOtpStore } from './infra/memory/otp-store.memory';
 import { RedisCameraReadingStore } from './infra/redis/camera-reading-store.redis';
 import { InMemoryCameraReadingStore } from './infra/memory/camera-reading-store.memory';
 import { RedisEntryVelocityStore } from './infra/redis/entry-velocity-store.redis';
 import { InMemoryEntryVelocityStore } from './infra/memory/entry-velocity-store.memory';
+import { RedisSessionStore } from './infra/redis/session-store.redis';
+import { InMemorySessionStore } from './infra/memory/session-store.memory';
 import { ConsoleMailer } from './infra/mail/console.mailer';
 import { ResendMailer } from './infra/mail/resend.mailer';
 import type { Mailer } from './infra/mail/mailer.port';
@@ -25,26 +29,34 @@ import type {
   OtpStore,
   CameraReadingStore,
   EntryVelocityStore,
+  SessionStore,
   MealRepository,
+  SettingsRepository,
+  SnapshotRepository,
 } from './core/ports';
 import { TokenService } from './modules/auth/token.service';
 import { AuthService } from './modules/auth/auth.service';
 import { createAuthMiddleware } from './modules/auth/auth.middleware';
 import { IngestService } from './modules/ingest/ingest.service';
+import { OccupancyService } from './modules/occupancy/occupancy.service';
 
 export interface Container {
   clock: SwitchableClock;
   eventBus: EventBus;
   userRepo: UserRepository;
   mealRepo: MealRepository;
+  settingsRepo: SettingsRepository;
+  snapshotRepo: SnapshotRepository;
   otpStore: OtpStore;
   cameraStore: CameraReadingStore;
   velocityStore: EntryVelocityStore;
+  sessionStore: SessionStore;
   mailer: Mailer;
   tokenService: TokenService;
   authService: AuthService;
   authMiddleware: ReturnType<typeof createAuthMiddleware>;
   ingestService: IngestService;
+  occupancyService: OccupancyService;
   redis?: Redis | undefined;
 }
 
@@ -53,13 +65,17 @@ export interface ContainerOverrides {
   eventBus?: EventBus | undefined;
   userRepo?: UserRepository | undefined;
   mealRepo?: MealRepository | undefined;
+  settingsRepo?: SettingsRepository | undefined;
+  snapshotRepo?: SnapshotRepository | undefined;
   otpStore?: OtpStore | undefined;
   cameraStore?: CameraReadingStore | undefined;
   velocityStore?: EntryVelocityStore | undefined;
+  sessionStore?: SessionStore | undefined;
   mailer?: Mailer | undefined;
   tokenService?: TokenService | undefined;
   authService?: AuthService | undefined;
   ingestService?: IngestService | undefined;
+  occupancyService?: OccupancyService | undefined;
   redis?: Redis | undefined;
 }
 
@@ -102,8 +118,21 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
     velocityStore = new RedisEntryVelocityStore(redis);
   }
 
+  // SessionStore
+  let sessionStore: SessionStore;
+  if (overrides.sessionStore) {
+    sessionStore = overrides.sessionStore;
+  } else if (process.env.NODE_ENV === 'test' && !process.env.USE_REDIS_IN_TESTS) {
+    sessionStore = new InMemorySessionStore();
+  } else {
+    redis = redis ?? new Redis(config.REDIS_URL, { maxRetriesPerRequest: null, lazyConnect: true });
+    sessionStore = new RedisSessionStore(redis);
+  }
+
   const userRepo = overrides.userRepo ?? new MongoUserRepository();
   const mealRepo = overrides.mealRepo ?? new MongoMealRepository();
+  const settingsRepo = overrides.settingsRepo ?? new MongoSettingsRepository();
+  const snapshotRepo = overrides.snapshotRepo ?? new MongoSnapshotRepository();
 
   let mailer: Mailer;
   if (overrides.mailer) {
@@ -133,19 +162,35 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
     overrides.ingestService ??
     new IngestService(cameraStore, velocityStore, mealRepo, eventBus);
 
+  const occupancyService =
+    overrides.occupancyService ??
+    new OccupancyService(
+      cameraStore,
+      sessionStore,
+      mealRepo,
+      settingsRepo,
+      snapshotRepo,
+      eventBus,
+      config.DEFAULT_MESS_ID
+    );
+
   return {
     clock,
     eventBus,
     userRepo,
     mealRepo,
+    settingsRepo,
+    snapshotRepo,
     otpStore,
     cameraStore,
     velocityStore,
+    sessionStore,
     mailer,
     tokenService,
     authService,
     authMiddleware,
     ingestService,
+    occupancyService,
     redis,
   };
 }

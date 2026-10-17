@@ -1,10 +1,11 @@
 /**
- * Smoke test: GET /healthz returns 200 {status: 'ok'}.
+ * Smoke test: GET /healthz and GET /readyz.
  * Uses Supertest against the Express app without listening on a real port.
  */
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import type { Application } from 'express';
+import { connectMongo, disconnectMongo } from './infra/mongo/connection';
 
 // Set required env vars before importing config
 process.env['NODE_ENV'] = 'test';
@@ -22,8 +23,13 @@ process.env['ALLOW_SIMULATOR'] = 'true';
 let app: Application;
 
 beforeAll(async () => {
+  await connectMongo();
   const { buildApp } = await import('./app');
   app = buildApp();
+});
+
+afterAll(async () => {
+  await disconnectMongo();
 });
 
 describe('GET /healthz', () => {
@@ -35,10 +41,15 @@ describe('GET /healthz', () => {
 });
 
 describe('GET /readyz', () => {
-  it('returns 200 with checks', async () => {
+  it('returns 200 with readiness checks for api, mongo, and redis', async () => {
     const res = await request(app).get('/readyz');
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('ok');
+    expect(res.body.checks).toEqual({
+      api: 'ok',
+      mongo: 'ok',
+      redis: 'ok',
+    });
   });
 });
 
