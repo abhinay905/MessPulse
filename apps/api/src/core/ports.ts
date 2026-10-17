@@ -34,6 +34,7 @@ export interface CameraReading {
   outCount: number;       // cumulative out since script start
   capturedAt: number;     // epoch ms (camera-side, informational)
   receivedAt: number;     // epoch ms (server authoritative)
+  cameraBaseline?: number | undefined;
 }
 
 // ─── Ephemeral Stores (Redis / Memory) ────────────────────────────────────────
@@ -180,6 +181,7 @@ export interface SettingsRepository {
 export interface MealRepository {
   findByMealId(messId: string, mealId: string): Promise<MealEntity | null>;
   findActiveAt(messId: string, now: number): Promise<MealEntity | null>;
+  findActiveOrUpcoming(messId: string, now: number, bufferMs?: number): Promise<MealEntity | null>;
   upsert(meal: Omit<MealEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<MealEntity>;
   updateTrayCapacity(messId: string, mealId: string, trayCapacity: number): Promise<MealEntity | null>;
 }

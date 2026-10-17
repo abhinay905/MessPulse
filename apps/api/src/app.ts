@@ -11,6 +11,7 @@ import { AppError } from './shared-kernel/errors';
 import { logger } from './infra/logger';
 import { buildContainer, type Container } from './container';
 import { createAuthRoutes } from './modules/auth/auth.routes';
+import { createIngestRoutes } from './modules/ingest/ingest.routes';
 
 export function buildApp(
   container: Container = buildContainer(),
@@ -41,6 +42,14 @@ export function buildApp(
 
   // ─── Feature Routes ──────────────────────────────────────────────────────────
   app.use('/api/v1/auth', createAuthRoutes(container.authService, container.authMiddleware));
+  app.use(
+    '/api/v1/mess',
+    createIngestRoutes(
+      container.ingestService,
+      container.clock,
+      container.authMiddleware.requireIngestKey
+    )
+  );
 
   if (configureExtraRoutes) {
     configureExtraRoutes(app);

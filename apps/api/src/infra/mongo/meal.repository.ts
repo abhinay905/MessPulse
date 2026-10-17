@@ -37,6 +37,15 @@ export class MongoMealRepository implements MealRepository {
     return doc ? toEntity(doc) : null;
   }
 
+  async findActiveOrUpcoming(messId: string, now: number, bufferMs = 5 * 60 * 1000): Promise<MealEntity | null> {
+    const doc = await MealModel.findOne({
+      messId: messId.trim(),
+      startsAt: { $lte: now + bufferMs },
+      endsAt: { $gte: now },
+    }).sort({ startsAt: 1 });
+    return doc ? toEntity(doc) : null;
+  }
+
   async upsert(meal: Omit<MealEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<MealEntity> {
     const doc = await MealModel.findOneAndUpdate(
       { messId: meal.messId.trim(), mealId: meal.mealId.trim() },
