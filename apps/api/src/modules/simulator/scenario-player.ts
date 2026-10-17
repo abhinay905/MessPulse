@@ -12,6 +12,7 @@ import type { ScenarioEvent } from '../../core/scenario';
 import type { Clock } from '../../core/ports';
 import type { IngestService } from '../ingest/ingest.service';
 import type { SessionService } from '../sessions/sessions.service';
+import type { AlertService } from '../alerts/alerts.service';
 import { logger } from '../../infra/logger';
 
 export interface ScenarioPlayerOptions {
@@ -19,11 +20,12 @@ export interface ScenarioPlayerOptions {
   clock: Clock;
   ingestService: IngestService;
   sessionService: SessionService;
+  alertsService?: AlertService | undefined;
   messId: string;
   mealId: string;
   speed: number;
-  onComplete?: () => void;
-  onError?: (err: unknown) => void;
+  onComplete?: (() => void) | undefined;
+  onError?: ((err: unknown) => void) | undefined;
 }
 
 export class ScenarioPlayer {
@@ -163,6 +165,10 @@ export class ScenarioPlayer {
         },
         now
       );
+
+      if (this.options.alertsService) {
+        await this.options.alertsService.handleTick(now, this.options.messId);
+      }
     }
 
     return this.eventIndex < this.options.events.length;

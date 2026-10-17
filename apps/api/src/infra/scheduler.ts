@@ -12,6 +12,10 @@ export interface ReaperJob {
   reap(now: number): Promise<number>;
 }
 
+export interface AlertTickJob {
+  handleTick(now?: number): Promise<void>;
+}
+
 export class Scheduler {
   private timers: NodeJS.Timeout[] = [];
   private isRunning = false;
@@ -19,7 +23,8 @@ export class Scheduler {
   constructor(
     private readonly occupancyService: OccupancyService,
     private readonly sessionReaper: ReaperJob,
-    private readonly clock: Clock
+    private readonly clock: Clock,
+    private readonly alertTickJob?: AlertTickJob | undefined
   ) {}
 
   start(): void {
@@ -28,12 +33,21 @@ export class Scheduler {
     }
     this.isRunning = true;
 
-    // 1-second Occupancy tick
+    // 1-second Occupancy & Alerts tick
     const tickTimer = setInterval(async () => {
+      const now = this.clock.now();
       try {
-        await this.occupancyService.tick(this.clock.now());
+        await this.occupancyService.tick(now);
       } catch (err) {
         logger.error({ err }, 'Scheduler job failed [occupancy.tick]');
+      }
+
+      if (this.alertTickJob) {
+        try {
+          await this.alertTickJob.handleTick(now);
+        } catch (err) {
+          logger.error({ err }, 'Scheduler job failed [alerts.tick]');
+        }
       }
     }, 1000);
     this.timers.push(tickTimer);

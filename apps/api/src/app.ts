@@ -18,6 +18,7 @@ import { createIngestRoutes } from './modules/ingest/ingest.routes';
 import { createOccupancyRoutes } from './modules/occupancy/occupancy.routes';
 import { createSessionsRoutes } from './modules/sessions/sessions.routes';
 import { createSimulatorRoutes } from './modules/simulator/simulator.routes';
+import { createAlertsRoutes } from './modules/alerts/alerts.routes';
 
 export function buildApp(
   container: Container = buildContainer(),
@@ -91,6 +92,10 @@ export function buildApp(
   const simulatorRoutes = createSimulatorRoutes(container.simulatorService, container.authMiddleware);
   app.use('/api/v1/admin/simulator', simulatorRoutes);
   app.use('/admin/simulator', simulatorRoutes);
+
+  const alertsRoutes = createAlertsRoutes(container.alertsService, container.authMiddleware);
+  app.use('/api/v1/staff', alertsRoutes);
+  app.use('/staff', alertsRoutes);
 
   if (configureExtraRoutes) {
     configureExtraRoutes(app);

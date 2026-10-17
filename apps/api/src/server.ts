@@ -28,7 +28,12 @@ async function bootstrap() {
   });
 
   const realtimeGateway = new RealtimeGateway(io, container.eventBus, container.tokenService);
-  const scheduler = new Scheduler(container.occupancyService, container.sessionsService, container.clock);
+  const scheduler = new Scheduler(
+    container.occupancyService,
+    container.sessionsService,
+    container.clock,
+    container.alertsService
+  );
 
   // Boot-time cleanup of lingering sim-* sessions from past simulation runs
   await container.simulatorService.bootCleanup();

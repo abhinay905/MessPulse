@@ -8,6 +8,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '../features/auth/LoginPage';
 import { StudentPage } from '../features/student/StudentPage';
 import { CheckInPage } from '../features/student/CheckInPage';
+import { StaffPage } from '../features/staff/StaffPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -28,6 +29,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute allowedRoles={['student', 'staff', 'admin']}>
         <CheckInPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/staff',
+    element: (
+      <ProtectedRoute allowedRoles={['staff', 'admin']}>
+        <StaffPage />
       </ProtectedRoute>
     ),
   },

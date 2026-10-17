@@ -19,12 +19,15 @@ import { ScenarioPlayer } from './scenario-player';
 import { ConflictError, ForbiddenError, ValidationError } from '../../shared-kernel/errors';
 import { logger } from '../../infra/logger';
 
+import type { AlertService } from '../alerts/alerts.service';
+
 export interface SimulatorServiceDeps {
   clock: SwitchableClock;
   ingestService: IngestService;
   sessionService: SessionService;
   sessionStore: SessionStore;
   mealRepo: MealRepository;
+  alertsService?: AlertService | undefined;
   allowSimulator: boolean;
   defaultMessId?: string;
 }
@@ -45,6 +48,7 @@ export class SimulatorService {
   private readonly sessionService: SessionService;
   private readonly sessionStore: SessionStore;
   private readonly mealRepo: MealRepository;
+  private readonly alertsService?: AlertService | undefined;
   private readonly allowSimulator: boolean;
   private readonly defaultMessId: string;
 
@@ -60,6 +64,7 @@ export class SimulatorService {
     this.sessionService = deps.sessionService;
     this.sessionStore = deps.sessionStore;
     this.mealRepo = deps.mealRepo;
+    this.alertsService = deps.alertsService;
     this.allowSimulator = deps.allowSimulator;
     this.defaultMessId = deps.defaultMessId || 'mess-main-hall';
   }
@@ -168,6 +173,7 @@ export class SimulatorService {
       clock: this.clock,
       ingestService: this.ingestService,
       sessionService: this.sessionService,
+      alertsService: this.alertsService,
       messId: meal.messId,
       mealId: meal.mealId,
       speed,

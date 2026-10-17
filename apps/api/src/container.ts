@@ -34,6 +34,7 @@ import type {
   SettingsRepository,
   SnapshotRepository,
   CheckInRepository,
+  AlertRepository,
 } from './core/ports';
 import { TokenService } from './modules/auth/token.service';
 import { AuthService } from './modules/auth/auth.service';
@@ -42,6 +43,10 @@ import { IngestService } from './modules/ingest/ingest.service';
 import { OccupancyService } from './modules/occupancy/occupancy.service';
 import { SessionService } from './modules/sessions/sessions.service';
 import { MongoCheckInRepository } from './infra/mongo/check-in.repository';
+import { MongoAlertRepository } from './infra/mongo/alert.repository';
+import { AlertEngine } from './modules/alerts/alert-engine';
+import { TrayDepletionRule } from './modules/alerts/rules/tray-depletion.rule';
+import { AlertService } from './modules/alerts/alerts.service';
 import { SimulatorService } from './modules/simulator/simulator.service';
 
 export interface Container {
@@ -52,6 +57,9 @@ export interface Container {
   settingsRepo: SettingsRepository;
   snapshotRepo: SnapshotRepository;
   checkInRepo: CheckInRepository;
+  alertRepo: AlertRepository;
+  alertEngine: AlertEngine;
+  alertsService: AlertService;
   otpStore: OtpStore;
   cameraStore: CameraReadingStore;
   velocityStore: EntryVelocityStore;
@@ -75,6 +83,9 @@ export interface ContainerOverrides {
   settingsRepo?: SettingsRepository | undefined;
   snapshotRepo?: SnapshotRepository | undefined;
   checkInRepo?: CheckInRepository | undefined;
+  alertRepo?: AlertRepository | undefined;
+  alertEngine?: AlertEngine | undefined;
+  alertsService?: AlertService | undefined;
   otpStore?: OtpStore | undefined;
   cameraStore?: CameraReadingStore | undefined;
   velocityStore?: EntryVelocityStore | undefined;
@@ -145,6 +156,15 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
   const settingsRepo = overrides.settingsRepo ?? new MongoSettingsRepository();
   const snapshotRepo = overrides.snapshotRepo ?? new MongoSnapshotRepository();
   const checkInRepo = overrides.checkInRepo ?? new MongoCheckInRepository();
+  const alertRepo = overrides.alertRepo ?? new MongoAlertRepository();
+
+  let alertEngine: AlertEngine;
+  if (overrides.alertEngine) {
+    alertEngine = overrides.alertEngine;
+  } else {
+    alertEngine = new AlertEngine();
+    alertEngine.register(new TrayDepletionRule());
+  }
 
   let mailer: Mailer;
   if (overrides.mailer) {
@@ -173,6 +193,20 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
   const ingestService =
     overrides.ingestService ??
     new IngestService(cameraStore, velocityStore, mealRepo, eventBus);
+
+  const alertsService =
+    overrides.alertsService ??
+    new AlertService(
+      alertEngine,
+      alertRepo,
+      mealRepo,
+      velocityStore,
+      cameraStore,
+      settingsRepo,
+      eventBus,
+      clock,
+      config.DEFAULT_MESS_ID
+    );
 
   const occupancyService =
     overrides.occupancyService ??
@@ -208,6 +242,7 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
       sessionService: sessionsService,
       sessionStore,
       mealRepo,
+      alertsService,
       allowSimulator:
         overrides.allowSimulator ??
         (process.env.ALLOW_SIMULATOR !== undefined
@@ -224,6 +259,9 @@ export function buildContainer(overrides: ContainerOverrides = {}): Container {
     settingsRepo,
     snapshotRepo,
     checkInRepo,
+    alertRepo,
+    alertEngine,
+    alertsService,
     otpStore,
     cameraStore,
     velocityStore,
